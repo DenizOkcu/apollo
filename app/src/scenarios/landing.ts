@@ -2,6 +2,10 @@ import { state, notify } from '../core/state';
 import { startTelemetry, stopTelemetry } from './scenario-runner';
 import type { Scenario } from './scenario-runner';
 import { getNounDef, formatNounValue } from '../core/nouns';
+import {
+  LANDING_INTRO, LANDING_P63, LANDING_IGNITION, GUIDANCE_EQUATIONS,
+  LANDING_P64_APPROACH, LANDING_P66_MANUAL, LANDING_CONTACT, LANDING_P68_CONFIRM,
+} from '../core/agc-source';
 
 function updateDisplayFromNav(): void {
   const noun = state.noun;
@@ -26,6 +30,11 @@ export const landingScenario: Scenario = {
   title: 'The Landing',
   steps: [
     // === INTRODUCTION ===
+    {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: LANDING_INTRO,
+    },
     {
       delay: 0,
       action: 'narrate',
@@ -79,6 +88,11 @@ export const landingScenario: Scenario = {
       delay: 500,
       action: 'setState',
       stateChanges: { program: 63 },
+    },
+    {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: LANDING_P63,
     },
     {
       delay: 0,
@@ -167,6 +181,11 @@ export const landingScenario: Scenario = {
     },
     {
       delay: 0,
+      action: 'showCode',
+      codeBlock: LANDING_IGNITION,
+    },
+    {
+      delay: 0,
       action: 'narrate',
       timestamp: 'PDI',
       text: 'ENGINE IGNITION. The descent engine throttles to 10% for 26 seconds of ullage settling.',
@@ -206,7 +225,12 @@ export const landingScenario: Scenario = {
     },
 
     {
-      delay: 10000,
+      delay: 6000,
+      action: 'showCode',
+      codeBlock: GUIDANCE_EQUATIONS,
+    },
+    {
+      delay: 4000,
       action: 'narrate',
       timestamp: 'T+04:30',
       text: '"Eagle, Houston. You are GO for powered descent." — Charlie Duke, CapCom',
@@ -250,7 +274,12 @@ export const landingScenario: Scenario = {
 
     // === TRANSITION TO P64 — APPROACH ===
     {
-      delay: 1000,
+      delay: 500,
+      action: 'showCode',
+      codeBlock: LANDING_P64_APPROACH,
+    },
+    {
+      delay: 500,
       action: 'narrate',
       timestamp: 'T+08:26',
       text: 'The AGC transitions to Program 64 — APPROACH PHASE. You can now see the landing site through the LPD window.',
@@ -324,6 +353,11 @@ export const landingScenario: Scenario = {
       delay: 0,
       action: 'callback',
       callback: () => stopTelemetry(),
+    },
+    {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: LANDING_P66_MANUAL,
     },
     {
       delay: 500,
@@ -409,6 +443,11 @@ export const landingScenario: Scenario = {
     },
     {
       delay: 0,
+      action: 'showCode',
+      codeBlock: LANDING_CONTACT,
+    },
+    {
+      delay: 0,
       action: 'setNav',
       navChanges: { altitude: 0, altitudeRate: 0, horizontalVelocity: 0 },
     },
@@ -455,7 +494,12 @@ export const landingScenario: Scenario = {
 
     // === P68: LANDING CONFIRMATION ===
     {
-      delay: 3000,
+      delay: 2000,
+      action: 'showCode',
+      codeBlock: LANDING_P68_CONFIRM,
+    },
+    {
+      delay: 1000,
       action: 'setState',
       stateChanges: { program: 68, verb: 6, noun: 43, verbNounFlash: true },
     },

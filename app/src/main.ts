@@ -1,10 +1,12 @@
 import './styles/layout.css';
 import './styles/dsky.css';
 import './styles/lights.css';
+import './styles/code.css';
 
 import { createDisplayPanel } from './dsky/display';
 import { bindPhysicalKeyboard } from './dsky/keyboard';
 import { createKeypadPanel, createNarrationPanel, createHelpBar } from './ui/panel';
+import { createCodeViewer } from './ui/code-viewer';
 import { createScenarioPicker } from './ui/scenario-picker';
 import { startClock } from './core/clock';
 import { runScenario } from './scenarios/scenario-runner';
@@ -60,11 +62,15 @@ function init(): void {
   dskyFrame.appendChild(keypadPanel);
   dskyContainer.appendChild(dskyFrame);
 
-  // Narration panel (right)
+  // Narration panel (middle)
   const narrationPanel = createNarrationPanel();
+
+  // Code viewer panel (right)
+  const codeViewer = createCodeViewer();
 
   main.appendChild(dskyContainer);
   main.appendChild(narrationPanel);
+  main.appendChild(codeViewer);
 
   // Help bar
   const helpBar = createHelpBar();

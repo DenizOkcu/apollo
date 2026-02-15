@@ -1,11 +1,13 @@
 import { state, notify } from '../core/state';
 import { appendNarration, clearNarration } from '../ui/panel';
+import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../ui/code-viewer';
 import { setKeyListener } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
+import type { AGCCodeBlock } from '../core/agc-source';
 
 export interface ScenarioStep {
   delay: number;  // ms to wait AFTER the previous step completes before executing this one
-  action: 'narrate' | 'setState' | 'waitForKey' | 'setNav' | 'setLights' | 'callback';
+  action: 'narrate' | 'setState' | 'waitForKey' | 'setNav' | 'setLights' | 'callback' | 'showCode';
   text?: string;
   timestamp?: string;
   stateChanges?: Partial<typeof state>;
@@ -14,6 +16,7 @@ export interface ScenarioStep {
   key?: DSKYKey;
   keyHint?: string;  // shown as a highlighted prompt to the user
   callback?: () => void;
+  codeBlock?: AGCCodeBlock;  // AGC source code block to display
 }
 
 export interface Scenario {
@@ -33,6 +36,7 @@ let cancelled = false;
 export function runScenario(scenario: Scenario): void {
   stopScenario();
   clearNarration();
+  clearCodeViewer();
 
   currentScenario = scenario;
   currentStepIndex = 0;
@@ -137,6 +141,14 @@ function executeCurrentStep(): void {
 
     case 'callback':
       if (step.callback) step.callback();
+      advanceToNextStep();
+      break;
+
+    case 'showCode':
+      if (step.codeBlock) {
+        addCodeSeparator();
+        showCodeBlock(step.codeBlock);
+      }
       advanceToNextStep();
       break;
 

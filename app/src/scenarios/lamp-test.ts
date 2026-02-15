@@ -1,5 +1,6 @@
 import type { Scenario } from './scenario-runner';
 import { pressKey } from '../dsky/keyboard';
+import { LAMP_TEST_INTRO } from '../core/agc-source';
 
 export const lampTestScenario: Scenario = {
   id: 'lamp-test',
@@ -9,6 +10,11 @@ export const lampTestScenario: Scenario = {
       delay: 0,
       action: 'setState',
       stateChanges: { program: 0, verb: null, noun: null },
+    },
+    {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: LAMP_TEST_INTRO,
     },
     {
       delay: 500,

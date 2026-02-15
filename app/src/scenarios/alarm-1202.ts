@@ -3,6 +3,10 @@ import { startTelemetry, stopTelemetry } from './scenario-runner';
 import type { Scenario } from './scenario-runner';
 import { triggerAlarm, displayAlarms, clearAlarms } from '../core/alarm';
 import { getNounDef, formatNounValue } from '../core/nouns';
+import {
+  ALARM_EXECUTIVE, ALARM_POODOO, ALARM_BAILOUT,
+  ALARM_CURTAINS, ALARM_RECOVERY, ALARM_HAMILTON,
+} from '../core/agc-source';
 
 function updateDisplayFromNav(): void {
   const noun = state.noun;
@@ -71,7 +75,12 @@ export const alarm1202Scenario: Scenario = {
     },
 
     {
-      delay: 3000,
+      delay: 1000,
+      action: 'showCode',
+      codeBlock: ALARM_EXECUTIVE,
+    },
+    {
+      delay: 2000,
       action: 'narrate',
       timestamp: 'T+06:10',
       text: 'V16 N62 is monitoring velocity, time from ignition, and delta-V. Unknown to the crew, the rendezvous radar has been left in a mode that floods the computer with interrupts...',
@@ -85,6 +94,11 @@ export const alarm1202Scenario: Scenario = {
         stopTelemetry();
         triggerAlarm(0o1202);
       },
+    },
+    {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: ALARM_POODOO,
     },
     {
       delay: 200,
@@ -124,7 +138,12 @@ export const alarm1202Scenario: Scenario = {
     },
 
     {
-      delay: 4000,
+      delay: 2000,
+      action: 'showCode',
+      codeBlock: ALARM_BAILOUT,
+    },
+    {
+      delay: 2000,
       action: 'narrate',
       timestamp: 'T+06:43',
       text: 'But the AGC was DESIGNED for this. Margaret Hamilton\'s priority-based software restarts immediately. Low-priority tasks are shed. Guidance — the highest priority — continues uninterrupted.',
@@ -143,9 +162,14 @@ export const alarm1202Scenario: Scenario = {
       text: '"We\'re GO on that alarm." — Steve Bales. The landing continues.',
     },
 
+    {
+      delay: 1000,
+      action: 'showCode',
+      codeBlock: ALARM_CURTAINS,
+    },
     // === USER: READ THE ALARM ===
     {
-      delay: 3000,
+      delay: 2000,
       action: 'narrate',
       text: 'As the astronaut, you need to check the alarm. Press R (RSET) to clear the error indicator.',
     },
@@ -202,6 +226,11 @@ export const alarm1202Scenario: Scenario = {
     },
 
     {
+      delay: 0,
+      action: 'showCode',
+      codeBlock: ALARM_RECOVERY,
+    },
+    {
       delay: 1000,
       action: 'narrate',
       timestamp: 'T+06:48',
@@ -235,7 +264,12 @@ export const alarm1202Scenario: Scenario = {
     },
 
     {
-      delay: 2000,
+      delay: 1000,
+      action: 'showCode',
+      codeBlock: ALARM_HAMILTON,
+    },
+    {
+      delay: 1000,
       action: 'narrate',
       text: 'This is why Margaret Hamilton\'s priority-based restart system was one of the most important software designs in history. The AGC could fail gracefully under overload — and it did, at the most critical moment in the mission.',
     },
