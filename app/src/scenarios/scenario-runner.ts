@@ -4,7 +4,7 @@ import { setKeyListener } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
 
 export interface ScenarioStep {
-  time: number;  // ms from scenario start
+  delay: number;  // ms to wait AFTER the previous step completes before executing this one
   action: 'narrate' | 'setState' | 'waitForKey' | 'setNav' | 'setLights' | 'callback';
   text?: string;
   timestamp?: string;
@@ -12,6 +12,7 @@ export interface ScenarioStep {
   navChanges?: Partial<typeof state.nav>;
   lightChanges?: Partial<typeof state.lights>;
   key?: DSKYKey;
+  keyHint?: string;  // shown as a highlighted prompt to the user
   callback?: () => void;
 }
 
@@ -23,69 +24,91 @@ export interface Scenario {
 }
 
 let currentScenario: Scenario | null = null;
-let timeouts: ReturnType<typeof setTimeout>[] = [];
+let currentStepIndex = 0;
+let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
 let waitingForKey: DSKYKey | null = null;
-let waitResolve: (() => void) | null = null;
 let telemetryInterval: ReturnType<typeof setInterval> | null = null;
+let cancelled = false;
 
 export function runScenario(scenario: Scenario): void {
   stopScenario();
   clearNarration();
 
   currentScenario = scenario;
+  currentStepIndex = 0;
+  cancelled = false;
   state.scenarioActive = true;
 
   setKeyListener((key) => {
     if (waitingForKey && key === waitingForKey) {
       waitingForKey = null;
-      if (waitResolve) {
-        waitResolve();
-        waitResolve = null;
-      }
+      // Key matched — advance to next step immediately
+      advanceToNextStep();
     }
   });
 
-  processSteps();
+  // Begin processing from the first step
+  scheduleNextStep();
 }
 
 export function stopScenario(): void {
+  cancelled = true;
   currentScenario = null;
-  state.scenarioActive = false;
+  currentStepIndex = 0;
   waitingForKey = null;
-  waitResolve = null;
 
-  for (const t of timeouts) clearTimeout(t);
-  timeouts = [];
+  if (pendingTimeout) {
+    clearTimeout(pendingTimeout);
+    pendingTimeout = null;
+  }
 
   if (telemetryInterval) {
     clearInterval(telemetryInterval);
     telemetryInterval = null;
   }
 
+  state.scenarioActive = false;
   setKeyListener(null);
 }
 
-function processSteps(): void {
-  if (!currentScenario) return;
-  const steps = currentScenario.steps;
+function scheduleNextStep(): void {
+  if (cancelled || !currentScenario) return;
+  if (currentStepIndex >= currentScenario.steps.length) {
+    // Scenario complete
+    if (currentScenario.onComplete) currentScenario.onComplete();
+    state.scenarioActive = false;
+    setKeyListener(null);
+    return;
+  }
 
-  for (let i = 0; i < steps.length; i++) {
-    const step = steps[i];
-    const delay = step.time;
+  const step = currentScenario.steps[currentStepIndex];
 
-    const t = setTimeout(() => {
-      executeStep(step);
-    }, delay);
-    timeouts.push(t);
+  if (step.delay > 0) {
+    pendingTimeout = setTimeout(() => {
+      pendingTimeout = null;
+      executeCurrentStep();
+    }, step.delay);
+  } else {
+    // Zero delay — execute immediately (but yield to let DOM update)
+    pendingTimeout = setTimeout(() => {
+      pendingTimeout = null;
+      executeCurrentStep();
+    }, 0);
   }
 }
 
-function executeStep(step: ScenarioStep): void {
+function executeCurrentStep(): void {
+  if (cancelled || !currentScenario) return;
+  if (currentStepIndex >= currentScenario.steps.length) return;
+
+  const step = currentScenario.steps[currentStepIndex];
+
   switch (step.action) {
     case 'narrate':
       if (step.text) {
         appendNarration(step.text, step.timestamp);
       }
+      advanceToNextStep();
       break;
 
     case 'setState':
@@ -93,6 +116,7 @@ function executeStep(step: ScenarioStep): void {
         Object.assign(state, step.stateChanges);
         notify('display');
       }
+      advanceToNextStep();
       break;
 
     case 'setNav':
@@ -100,6 +124,7 @@ function executeStep(step: ScenarioStep): void {
         Object.assign(state.nav, step.navChanges);
         notify('display');
       }
+      advanceToNextStep();
       break;
 
     case 'setLights':
@@ -107,16 +132,28 @@ function executeStep(step: ScenarioStep): void {
         Object.assign(state.lights, step.lightChanges);
         notify('display');
       }
+      advanceToNextStep();
       break;
 
     case 'callback':
       if (step.callback) step.callback();
+      advanceToNextStep();
       break;
 
     case 'waitForKey':
+      // BLOCK here — do NOT advance until the key is pressed
       waitingForKey = step.key || null;
+      if (step.keyHint) {
+        appendNarration(step.keyHint, '  >>');
+      }
+      // The key listener (set up in runScenario) will call advanceToNextStep()
       break;
   }
+}
+
+function advanceToNextStep(): void {
+  currentStepIndex++;
+  scheduleNextStep();
 }
 
 // Helper: start a telemetry animation that interpolates nav values over time
@@ -140,7 +177,6 @@ export function startTelemetry(
   telemetryInterval = setInterval(() => {
     const elapsed = Date.now() - startTime;
     const t = Math.min(elapsed / duration, 1);
-    // Ease-out curve for more natural deceleration feel
     const eased = 1 - Math.pow(1 - t, 2);
 
     for (const key of Object.keys(endValues)) {
@@ -148,7 +184,6 @@ export function startTelemetry(
       (state.nav as any)[navKey] = startValues[key] + (endValues[key] - startValues[key]) * eased;
     }
 
-    // Re-render the display if a monitor is active
     if (state.monitorActive || onTick) {
       notify('display');
       if (onTick) onTick();

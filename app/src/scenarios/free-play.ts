@@ -5,12 +5,12 @@ export const freePlayScenario: Scenario = {
   title: 'Explore Freely',
   steps: [
     {
-      time: 0,
+      delay: 0,
       action: 'setState',
       stateChanges: { program: 0, verb: null, noun: null, verbNounFlash: false },
     },
     {
-      time: 0,
+      delay: 0,
       action: 'setNav',
       navChanges: {
         latitude: 0.6875,
@@ -24,49 +24,44 @@ export const freePlayScenario: Scenario = {
       },
     },
     {
-      time: 500,
+      delay: 500,
       action: 'narrate',
       text: 'You have full control of the DSKY. Try these commands:',
     },
     {
-      time: 2500,
+      delay: 2000,
       action: 'narrate',
       text: 'V35 ENTR — Lamp test (light up everything)',
     },
     {
-      time: 4000,
+      delay: 1500,
       action: 'narrate',
       text: 'V16 N36 ENTR — Display the mission clock (auto-updating)',
     },
     {
-      time: 5500,
+      delay: 1500,
       action: 'narrate',
       text: 'V06 N43 ENTR — Display position (lat/long/alt)',
     },
     {
-      time: 7000,
+      delay: 1500,
       action: 'narrate',
       text: 'V16 N60 ENTR — Monitor landing data (velocity/altitude)',
     },
     {
-      time: 8500,
+      delay: 1500,
       action: 'narrate',
       text: 'V36 ENTR — Fresh start (reboot)',
     },
     {
-      time: 10000,
+      delay: 2000,
       action: 'narrate',
-      text: 'Type VERB (V key) then 2 digits, NOUN (N key) then 2 digits, then ENTER.',
+      text: 'Type V (VERB) then 2 digits, N (NOUN) then 2 digits, then ENTER.',
     },
     {
-      time: 12000,
+      delay: 2000,
       action: 'narrate',
-      text: 'If you make a mistake, the OPR ERR light turns on. Press R (RSET) to clear it.',
-    },
-    {
-      time: 14000,
-      action: 'narrate',
-      text: 'The keyboard shortcuts are shown at the bottom of the screen. Explore!',
+      text: 'If you make a mistake, the OPR ERR light turns on. Press R (RSET) to clear it. Keyboard shortcuts are shown below.',
     },
   ],
 };

@@ -6,45 +6,62 @@ export const lampTestScenario: Scenario = {
   title: 'Lamp Test',
   steps: [
     {
-      time: 0,
+      delay: 0,
       action: 'setState',
       stateChanges: { program: 0, verb: null, noun: null },
     },
     {
-      time: 500,
+      delay: 500,
       action: 'narrate',
       text: 'Before every critical operation, astronauts tested the DSKY display to verify all segments worked.',
     },
     {
-      time: 3000,
+      delay: 3000,
       action: 'narrate',
-      text: 'Type V 3 5 ENTER to run a lamp test. Or just watch — we\'ll do it automatically in a moment.',
+      text: 'Type V 3 5 ENTER to run a lamp test — this lights up every segment and indicator.',
     },
-    // Auto-execute lamp test after giving the user a chance
     {
-      time: 8000,
+      delay: 0,
+      action: 'waitForKey',
+      key: 'VERB',
+      keyHint: 'Press V (VERB) to begin.',
+    },
+    {
+      delay: 0,
+      action: 'narrate',
+      text: 'Now type 3 5 and press ENTER.',
+    },
+    {
+      delay: 0,
+      action: 'waitForKey',
+      key: 'ENTER',
+      keyHint: 'Type 3 5 then press ENTER.',
+    },
+    // Auto-trigger lamp test in case the user typed something slightly different
+    {
+      delay: 200,
       action: 'callback',
       callback: () => {
         pressKey('VERB');
-        setTimeout(() => pressKey('3'), 300);
-        setTimeout(() => pressKey('5'), 600);
-        setTimeout(() => pressKey('ENTER'), 900);
+        setTimeout(() => pressKey('3'), 100);
+        setTimeout(() => pressKey('5'), 200);
+        setTimeout(() => pressKey('ENTER'), 300);
       },
     },
     {
-      time: 9500,
+      delay: 1000,
       action: 'narrate',
-      text: 'V35 — LAMP TEST. Every segment and indicator light is now active. The real DSKY used electroluminescent displays that glowed green.',
+      text: 'V35 — LAMP TEST. Every segment and indicator light is now active. The real DSKY used electroluminescent displays that glowed green — just like this.',
     },
     {
-      time: 14000,
+      delay: 6000,
       action: 'narrate',
-      text: 'All systems nominal. The display is ready for operations.',
+      text: 'All systems nominal. The display is verified and ready for operations.',
     },
     {
-      time: 16000,
+      delay: 3000,
       action: 'narrate',
-      text: 'Try V16 N36 ENTER to see the mission clock, or pick another scenario from the menu.',
+      text: 'Try V16 N36 ENTER to see the mission clock, or pick another scenario.',
     },
   ],
 };

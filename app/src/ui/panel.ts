@@ -102,12 +102,13 @@ export function appendNarration(text: string, timestamp?: string): void {
   if (!content) return;
 
   const entry = document.createElement('div');
-  entry.className = 'narration-entry';
+  const isHint = timestamp === '  >>';
+  entry.className = isHint ? 'narration-entry key-hint' : 'narration-entry';
 
   if (timestamp) {
     const ts = document.createElement('span');
     ts.className = 'narration-timestamp';
-    ts.textContent = `[${timestamp}] `;
+    ts.textContent = isHint ? '>> ' : `[${timestamp}] `;
     entry.appendChild(ts);
   }
 

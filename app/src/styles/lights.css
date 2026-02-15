@@ -3,78 +3,80 @@
 .dsky-lights-column {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   padding: 4px 0;
-  min-width: 70px;
+  min-width: 76px;
 }
 
 .dsky-light {
-  width: 66px;
-  height: 28px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  width: 72px;
+  height: 30px;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
   border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Courier New', monospace;
-  font-size: 7px;
-  font-weight: bold;
-  color: #333;
+  font-family: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #666;
   text-align: center;
   white-space: pre-line;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
+  letter-spacing: 0.8px;
+  line-height: 1.25;
+  text-transform: uppercase;
   transition: all 0.15s ease;
   cursor: default;
   user-select: none;
 }
 
-/* Active indicator: glowing amber/yellow */
+/* Active indicator: glowing amber/white */
 .dsky-light.active {
-  background: #c89b00;
+  background: #d4a800;
   color: #000;
-  border-color: #e0b000;
+  border-color: #f0c800;
   box-shadow:
-    0 0 8px rgba(200, 155, 0, 0.6),
-    0 0 16px rgba(200, 155, 0, 0.3),
-    inset 0 0 4px rgba(255, 220, 50, 0.3);
+    0 0 8px rgba(212, 168, 0, 0.6),
+    0 0 18px rgba(212, 168, 0, 0.3),
+    inset 0 0 6px rgba(255, 230, 80, 0.3);
 }
 
-/* Specific light colors */
+/* Specific light colors — warning/alarm lights glow red/orange */
 .dsky-light[data-light="prog"].active,
 .dsky-light[data-light="restart"].active {
-  background: #cc3300;
-  border-color: #ee4400;
+  background: #dd3300;
+  color: #fff;
+  border-color: #ff4400;
   box-shadow:
-    0 0 8px rgba(204, 51, 0, 0.6),
-    0 0 16px rgba(204, 51, 0, 0.3),
-    inset 0 0 4px rgba(255, 100, 50, 0.3);
+    0 0 10px rgba(221, 51, 0, 0.7),
+    0 0 20px rgba(221, 51, 0, 0.35),
+    inset 0 0 6px rgba(255, 100, 50, 0.3);
 }
 
 .dsky-light[data-light="oprErr"].active {
-  background: #cc3300;
-  border-color: #ee4400;
+  background: #dd3300;
+  color: #fff;
+  border-color: #ff4400;
   box-shadow:
-    0 0 8px rgba(204, 51, 0, 0.6),
-    0 0 16px rgba(204, 51, 0, 0.3);
+    0 0 10px rgba(221, 51, 0, 0.7),
+    0 0 20px rgba(221, 51, 0, 0.35);
 }
 
 .dsky-light[data-light="gimbalLock"].active {
-  background: #cc6600;
-  border-color: #ee7700;
-  box-shadow:
-    0 0 8px rgba(204, 102, 0, 0.6),
-    0 0 16px rgba(204, 102, 0, 0.3);
-}
-
-.dsky-light[data-light="compActy"].active {
-  background: #00ff41;
+  background: #dd6600;
   color: #000;
+  border-color: #ff8800;
+  box-shadow:
+    0 0 10px rgba(221, 102, 0, 0.7),
+    0 0 20px rgba(221, 102, 0, 0.35);
 }
 
-/* Pulsing animation for comp acty when actively computing */
-@keyframes compPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.dsky-light[data-light="keyRel"].active {
+  background: #d4a800;
+  color: #000;
+  border-color: #f0c800;
+  box-shadow:
+    0 0 8px rgba(212, 168, 0, 0.6),
+    0 0 18px rgba(212, 168, 0, 0.3);
 }
