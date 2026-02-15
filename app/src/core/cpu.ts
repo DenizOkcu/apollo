@@ -1,6 +1,8 @@
 import { state, notify } from './state';
 import { executeVerb, stopMonitor } from './verbs';
 import { triggerOprErr } from '../dsky/opr-err';
+import { getCodeBlockForCommand } from './verb-code-map';
+import { showCodeBlock, clearCodeViewer } from '../ui/code-viewer';
 
 export function dispatch(): boolean {
   const verb = state.verb;
@@ -35,6 +37,15 @@ export function dispatch(): boolean {
   }
 
   notify('display');
+
+  if (!state.scenarioActive) {
+    const codeBlock = getCodeBlockForCommand(verb, state.noun);
+    if (codeBlock) {
+      clearCodeViewer();
+      showCodeBlock(codeBlock);
+    }
+  }
+
   return true;
 }
 
@@ -48,6 +59,14 @@ export function completeProgramChange(programNumber: number): void {
   state.inputBuffer = '';
   state.inputTarget = null;
   notify('display');
+
+  if (!state.scenarioActive) {
+    const codeBlock = getCodeBlockForCommand(37, null);
+    if (codeBlock) {
+      clearCodeViewer();
+      showCodeBlock(codeBlock);
+    }
+  }
 }
 
 export function completeDataLoad(reg: 'r1' | 'r2' | 'r3', sign: '+' | '-', digits: string): void {
