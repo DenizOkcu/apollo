@@ -1,0 +1,201 @@
+/* ===== 7-SEGMENT DIGIT DISPLAY ===== */
+
+.seg-digit {
+  position: relative;
+  width: 28px;
+  height: 48px;
+  margin: 0 2px;
+  display: inline-block;
+}
+
+/* Segment base style — barely visible when off */
+.seg {
+  position: absolute;
+  background: #0a1f0a;
+  transition: background 0.05s, box-shadow 0.05s;
+}
+
+/* Active segment — glowing green */
+.seg.active {
+  background: #00ff41;
+  box-shadow: 0 0 6px #00ff41, 0 0 12px rgba(0, 255, 65, 0.3);
+}
+
+/* Horizontal segments (a, d, g) */
+.seg-a, .seg-d, .seg-g {
+  width: 20px;
+  height: 3px;
+  left: 4px;
+  border-radius: 1px;
+}
+.seg-a { top: 0; }
+.seg-g { top: 22px; }
+.seg-d { top: 45px; }
+
+/* Vertical segments (b, c, e, f) */
+.seg-b, .seg-c, .seg-e, .seg-f {
+  width: 3px;
+  height: 19px;
+  border-radius: 1px;
+}
+.seg-f { left: 1px; top: 3px; }
+.seg-b { right: 1px; top: 3px; }
+.seg-e { left: 1px; top: 25px; }
+.seg-c { right: 1px; top: 25px; }
+
+/* ===== SIGN DISPLAY (+/-) ===== */
+
+.seg-sign {
+  position: relative;
+  width: 20px;
+  height: 48px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin-right: 4px;
+}
+
+.sign-plus, .sign-minus {
+  position: relative;
+  width: 16px;
+  height: 16px;
+}
+
+.sign-bar {
+  position: absolute;
+  background: #0a1f0a;
+  transition: background 0.05s, box-shadow 0.05s;
+}
+
+.sign-h {
+  width: 14px;
+  height: 3px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sign-v {
+  width: 3px;
+  height: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sign-plus.active .sign-bar,
+.sign-minus.active .sign-bar {
+  background: #00ff41;
+  box-shadow: 0 0 6px #00ff41, 0 0 12px rgba(0, 255, 65, 0.3);
+}
+
+/* ===== DSKY DISPLAY PANEL ===== */
+
+.dsky-display {
+  display: flex;
+  gap: 12px;
+  background: #111;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.dsky-display-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+/* ===== LABELED ROWS (PROG, VERB, NOUN) ===== */
+
+.dsky-labeled-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dsky-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  color: #888;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.dsky-digits {
+  display: flex;
+  align-items: center;
+}
+
+/* ===== VERB/NOUN ROW ===== */
+
+.dsky-verb-noun-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.dsky-verb-noun-container {
+  padding: 4px 0;
+}
+
+/* Flash animation for verb/noun */
+.dsky-verb-noun-container.flashing .dsky-verb-noun-row {
+  animation: vnflash 0.7s ease-in-out infinite;
+}
+
+@keyframes vnflash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== SEPARATOR LINE ===== */
+
+.dsky-separator {
+  width: 100%;
+  height: 1px;
+  background: #333;
+  margin: 4px 0;
+}
+
+/* ===== REGISTER ROW (sign + 5 digits) ===== */
+
+.dsky-register {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+/* ===== COMP ACTY ===== */
+
+.dsky-comp-acty {
+  width: 54px;
+  height: 32px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  font-size: 7px;
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+  white-space: pre-line;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.dsky-comp-acty.active {
+  background: #00ff41;
+  color: #000;
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}

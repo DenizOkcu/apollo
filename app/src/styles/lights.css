@@ -1,0 +1,80 @@
+/* ===== INDICATOR LIGHTS COLUMN ===== */
+
+.dsky-lights-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+  min-width: 70px;
+}
+
+.dsky-light {
+  width: 66px;
+  height: 28px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  font-size: 7px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  white-space: pre-line;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  cursor: default;
+  user-select: none;
+}
+
+/* Active indicator: glowing amber/yellow */
+.dsky-light.active {
+  background: #c89b00;
+  color: #000;
+  border-color: #e0b000;
+  box-shadow:
+    0 0 8px rgba(200, 155, 0, 0.6),
+    0 0 16px rgba(200, 155, 0, 0.3),
+    inset 0 0 4px rgba(255, 220, 50, 0.3);
+}
+
+/* Specific light colors */
+.dsky-light[data-light="prog"].active,
+.dsky-light[data-light="restart"].active {
+  background: #cc3300;
+  border-color: #ee4400;
+  box-shadow:
+    0 0 8px rgba(204, 51, 0, 0.6),
+    0 0 16px rgba(204, 51, 0, 0.3),
+    inset 0 0 4px rgba(255, 100, 50, 0.3);
+}
+
+.dsky-light[data-light="oprErr"].active {
+  background: #cc3300;
+  border-color: #ee4400;
+  box-shadow:
+    0 0 8px rgba(204, 51, 0, 0.6),
+    0 0 16px rgba(204, 51, 0, 0.3);
+}
+
+.dsky-light[data-light="gimbalLock"].active {
+  background: #cc6600;
+  border-color: #ee7700;
+  box-shadow:
+    0 0 8px rgba(204, 102, 0, 0.6),
+    0 0 16px rgba(204, 102, 0, 0.3);
+}
+
+.dsky-light[data-light="compActy"].active {
+  background: #00ff41;
+  color: #000;
+}
+
+/* Pulsing animation for comp acty when actively computing */
+@keyframes compPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

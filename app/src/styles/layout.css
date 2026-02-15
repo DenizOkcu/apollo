@@ -1,0 +1,483 @@
+/* ===== GLOBAL RESET & BASE ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background: #0a0a0a;
+  color: #ccc;
+  font-family: 'Courier New', 'Consolas', monospace;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #00ff41;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.app-subtitle {
+  font-size: 10px;
+  color: #555;
+  letter-spacing: 1px;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-scenarios {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #00ff41;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.btn-scenarios:hover {
+  background: #222;
+  border-color: #00ff41;
+}
+
+/* ===== MAIN CONTENT AREA ===== */
+
+.app-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== DSKY CONTAINER (left side) ===== */
+
+.dsky-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #0d0d0d;
+  min-width: 380px;
+  max-width: 420px;
+  overflow-y: auto;
+}
+
+.dsky-frame {
+  background: #1a1a1a;
+  border: 3px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dsky-nameplate {
+  text-align: center;
+  font-size: 10px;
+  color: #444;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #222;
+}
+
+/* ===== KEYPAD ===== */
+
+.dsky-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+.keypad-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.dsky-key {
+  width: 56px;
+  height: 44px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: pre-line;
+  line-height: 1.2;
+  transition: all 0.08s;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dsky-key:hover {
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border-color: #555;
+}
+
+.dsky-key:active,
+.dsky-key.pressed {
+  background: linear-gradient(180deg, #1a1a1a 0%, #222 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  transform: translateY(1px);
+}
+
+.key-action {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  color: #aaa;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+.key-enter {
+  background: linear-gradient(180deg, #1a3a1a 0%, #0a2a0a 100%);
+  color: #00ff41;
+  border-color: #1a4a1a;
+  font-size: 11px;
+}
+
+.key-enter:hover {
+  background: linear-gradient(180deg, #1a4a1a 0%, #0a3a0a 100%);
+  border-color: #00ff41;
+}
+
+.key-sign {
+  color: #00ff41;
+  font-size: 18px;
+}
+
+.key-digit {
+  color: #eee;
+  font-size: 16px;
+}
+
+.key-rset {
+  width: 120px;
+}
+
+/* ===== NARRATION PANEL (right side) ===== */
+
+.narration-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #1a1a1a;
+  background: #080808;
+  min-width: 300px;
+}
+
+.narration-header {
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #444;
+  letter-spacing: 3px;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+}
+
+.narration-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.narration-entry {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #aaa;
+  border-left: 2px solid #1a1a1a;
+  padding-left: 12px;
+}
+
+.narration-timestamp {
+  color: #00ff41;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.narration-text {
+  color: #bbb;
+}
+
+/* ===== HELP BAR ===== */
+
+.help-bar {
+  padding: 6px 16px;
+  background: #111;
+  border-top: 1px solid #1a1a1a;
+  flex-shrink: 0;
+}
+
+.help-keys {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.help-key {
+  font-size: 10px;
+  color: #555;
+  white-space: nowrap;
+}
+
+.help-key kbd {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 10px;
+  color: #00ff41;
+  margin-right: 2px;
+}
+
+/* ===== SCENARIO PICKER OVERLAY ===== */
+
+.scenario-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.scenario-overlay.hidden {
+  animation: fadeOut 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.scenario-modal {
+  max-width: 700px;
+  width: 90%;
+  text-align: center;
+  padding: 32px;
+}
+
+.scenario-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #00ff41;
+  letter-spacing: 8px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+.scenario-subtitle {
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.scenario-desc {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 32px;
+}
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.scenario-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-card:hover {
+  border-color: #00ff41;
+  background: #151515;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.1);
+}
+
+.scenario-card-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #00ff41;
+  letter-spacing: 1px;
+}
+
+.scenario-badge {
+  display: inline-block;
+  font-size: 9px;
+  color: #888;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  align-self: flex-start;
+}
+
+.scenario-card-desc {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.5;
+}
+
+.scenario-footer {
+  font-size: 10px;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+/* ===== CRT SCANLINE EFFECT ===== */
+
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.03) 0px,
+    rgba(0, 0, 0, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column;
+  }
+
+  .dsky-container {
+    min-width: unset;
+    max-width: unset;
+    padding: 8px;
+  }
+
+  .narration-panel {
+    border-left: none;
+    border-top: 1px solid #1a1a1a;
+    min-width: unset;
+    max-height: 40vh;
+  }
+
+  .scenario-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-title {
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  .seg-digit {
+    width: 22px;
+    height: 38px;
+  }
+
+  .seg-a, .seg-d, .seg-g {
+    width: 16px;
+    left: 3px;
+  }
+
+  .seg-b, .seg-c, .seg-e, .seg-f {
+    height: 15px;
+  }
+
+  .seg-g { top: 17px; }
+  .seg-d { top: 35px; }
+  .seg-e, .seg-f { top: 20px; }
+
+  .dsky-key {
+    width: 48px;
+    height: 40px;
+    font-size: 11px;
+  }
+}
