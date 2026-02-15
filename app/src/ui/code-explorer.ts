@@ -43,7 +43,7 @@ function parseLine(raw: string): { isComment: boolean; isLabel: boolean; isHighl
 
 async function fetchIndex(): Promise<AGCIndex> {
   if (index) return index;
-  const res = await fetch('/agc/agc-index.json');
+  const res = await fetch(`${import.meta.env.BASE_URL}agc/agc-index.json`);
   index = (await res.json()) as AGCIndex;
   return index;
 }
@@ -54,7 +54,7 @@ async function fetchSource(moduleName: string, fileName: string): Promise<string
   const key = `${moduleName}/${fileName}`;
   const cached = fileCache.get(key);
   if (cached !== undefined) return cached;
-  const res = await fetch(`/agc/${key}`);
+  const res = await fetch(`${import.meta.env.BASE_URL}agc/${key}`);
   const text = await res.text();
   fileCache.set(key, text);
   return text;
