@@ -3,11 +3,13 @@ import './styles/dsky.css';
 import './styles/lights.css';
 import './styles/code.css';
 import './styles/explorer.css';
+import './styles/mobile.css';
 
 import { createDisplayPanel } from './dsky/display';
 import { bindPhysicalKeyboard } from './dsky/keyboard';
 import { createKeypadPanel, createNarrationPanel, createHelpBar } from './ui/panel';
 import { createCodeViewer } from './ui/code-viewer';
+import { initMobileController } from './ui/mobile-controller';
 import { createScenarioPicker } from './ui/scenario-picker';
 import { startClock } from './core/clock';
 import { runScenario } from './scenarios/scenario-runner';
@@ -94,6 +96,14 @@ function init(): void {
 
   // Bind keyboard
   bindPhysicalKeyboard();
+
+  // Mobile layout controller
+  initMobileController({
+    dskyContainer,
+    narrationPanel,
+    codePanel: codeViewer,
+    appMain: main,
+  });
 
   // Start clock
   startClock();

@@ -1,0 +1,377 @@
+/* ===== MOBILE & TABLET RESPONSIVE LAYOUT ===== */
+
+/* ── Core mobile layout (≤768px) ─────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Header: compact */
+  .app-header {
+    padding: 6px 12px;
+  }
+
+  .app-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .app-subtitle {
+    font-size: 9px;
+  }
+
+  .btn-scenarios {
+    font-size: 10px;
+    padding: 6px 10px;
+    letter-spacing: 1px;
+  }
+
+  /* Main layout: stacked column */
+  .app-main {
+    flex-direction: column;
+  }
+
+  /* Narration panel: top 1/3 */
+  .narration-panel {
+    flex: 1;
+    order: 1;
+    min-height: 0;
+    max-height: none;
+    border-left: none;
+    border-top: none;
+    min-width: unset;
+    overflow: hidden;
+  }
+
+  /* DSKY container: bottom 2/3, always visible */
+  .dsky-container {
+    flex: 2;
+    order: 2;
+    min-width: unset;
+    max-width: unset;
+    overflow-y: auto;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid #1a1a1a;
+  }
+
+  /* Code header: truncate title so EXPLORE button stays visible */
+  .code-header span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Code panel: slides in from the right */
+  .code-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85vw;
+    max-width: 400px;
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    border-left: 1px solid #00ff41;
+    border-top: none;
+    max-height: none;
+  }
+
+  .code-panel.code-panel-open {
+    transform: translateX(0);
+  }
+
+  /* Code panel backdrop */
+  .code-panel-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 199;
+    display: none;
+  }
+
+  .code-panel-backdrop.active {
+    display: block;
+  }
+
+  /* CODE toggle tab: right edge */
+  .code-toggle-tab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    writing-mode: vertical-rl;
+    background: #111;
+    border: 1px solid #00ff41;
+    border-right: none;
+    color: #00ff41;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    padding: 12px 6px;
+    cursor: pointer;
+    border-radius: 4px 0 0 4px;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+    touch-action: manipulation;
+  }
+
+
+
+  /* Help bar: hidden on mobile — no physical keyboard */
+  .help-bar {
+    display: none;
+  }
+
+  /* DSKY component sizing */
+  .dsky-key {
+    width: 48px;
+    height: 40px;
+    font-size: 11px;
+  }
+
+  .key-rset {
+    width: 102px;
+  }
+
+  .seg-digit {
+    width: 22px;
+    height: 38px;
+  }
+
+  .seg-sign {
+    height: 38px;
+    width: 16px;
+  }
+
+  .seg-a, .seg-d, .seg-g {
+    width: 16px;
+    left: 3px;
+  }
+
+  .seg-b, .seg-c, .seg-e, .seg-f {
+    height: 15px;
+  }
+
+  .seg-g { top: 17px; }
+  .seg-d { top: 35px; }
+  .seg-f, .seg-b { top: 2px; }
+  .seg-e, .seg-c { top: 20px; }
+
+  .dsky-light {
+    width: 60px;
+    height: 26px;
+    font-size: 7.5px;
+  }
+
+  .dsky-lights-column {
+    min-width: 64px;
+    gap: 4px;
+  }
+
+  .dsky-display {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .dsky-keypad {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .keypad-row {
+    gap: 4px;
+  }
+
+  .dsky-frame {
+    padding: 10px;
+  }
+
+  .dsky-comp-acty {
+    width: 50px;
+    height: 28px;
+    font-size: 7.5px;
+    margin-bottom: 4px;
+  }
+
+  /* Scenario picker: mobile */
+  .scenario-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-title {
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  .scenario-modal {
+    padding: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .scenario-card {
+    padding: 12px;
+  }
+
+  .scenario-card-title {
+    font-size: 14px;
+  }
+
+  /* Touch targets */
+  .dsky-key,
+  .btn-scenarios,
+  .scenario-card,
+  .code-explore-btn,
+  .code-toggle-tab {
+    touch-action: manipulation;
+  }
+
+  /* Explorer mobile overrides */
+  .explorer-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 75vw;
+    z-index: 1002;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    border-right: 1px solid #00ff41;
+  }
+
+  .explorer-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .explorer-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: none;
+  }
+
+  .explorer-sidebar-backdrop.active {
+    display: block;
+  }
+
+  .explorer-files-tab {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    writing-mode: vertical-rl;
+    background: #111;
+    border: 1px solid #00ff41;
+    border-left: none;
+    color: #00ff41;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    padding: 12px 6px;
+    cursor: pointer;
+    border-radius: 0 4px 4px 0;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+    touch-action: manipulation;
+  }
+
+  .explorer-source {
+    font-size: 11px;
+  }
+
+  .explorer-layout {
+    flex-direction: row;
+  }
+}
+
+/* ── Very small screens (≤420px) ─────────────────────────────── */
+
+@media (max-width: 420px) {
+  .dsky-key {
+    width: 42px;
+    height: 36px;
+    font-size: 10px;
+  }
+
+  .key-rset {
+    width: 90px;
+  }
+
+  .seg-digit {
+    width: 20px;
+    height: 34px;
+  }
+
+  .seg-sign {
+    height: 34px;
+    width: 14px;
+  }
+
+  .seg-a, .seg-d, .seg-g {
+    width: 14px;
+    left: 3px;
+  }
+
+  .seg-b, .seg-c, .seg-e, .seg-f {
+    height: 13px;
+  }
+
+  .seg-g { top: 15px; }
+  .seg-d { top: 31px; }
+  .seg-f, .seg-b { top: 2px; }
+  .seg-e, .seg-c { top: 17px; }
+
+  .dsky-light {
+    width: 54px;
+    height: 24px;
+    font-size: 7px;
+  }
+
+  .dsky-lights-column {
+    min-width: 58px;
+  }
+}
+
+/* ── Tablet (769–1024px) ─────────────────────────────────────── */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dsky-container {
+    min-width: 320px;
+    max-width: 350px;
+  }
+
+  .dsky-key {
+    width: 50px;
+    height: 42px;
+  }
+
+  .key-rset {
+    width: 106px;
+  }
+
+  .narration-entry {
+    font-size: 12px;
+  }
+
+  .code-content {
+    font-size: 11px;
+  }
+}
+
+/* ── Mobile landscape ────────────────────────────────────────── */
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-subtitle {
+    display: none;
+  }
+}

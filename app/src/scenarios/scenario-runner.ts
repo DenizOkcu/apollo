@@ -5,6 +5,7 @@ import { setKeyListener, pressKey } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
 import type { AGCCodeBlock } from '../core/agc-source';
 import { clearAlarms } from '../core/alarm';
+import { getMobileController } from '../ui/mobile-controller';
 
 export interface ScenarioStep {
   delay: number;  // ms to wait AFTER the previous step completes before executing this one
@@ -110,12 +111,14 @@ export function runScenario(scenario: Scenario): void {
   currentStepIndex = 0;
   cancelled = false;
   state.scenarioActive = true;
+  getMobileController()?.setFreePlayMode(scenario.id === 'free-play');
 
   setKeyListener((key) => {
     if (waitingForKey && key === waitingForKey) {
       clearAutoRecovery();
       nudgeShown = false;
       waitingForKey = null;
+      getMobileController()?.hideDSKYAfterInput();
       // Key matched — advance to next step immediately
       advanceToNextStep();
     } else if (waitingForKey) {
@@ -246,6 +249,7 @@ function executeCurrentStep(): void {
       if (step.keyHint) {
         appendNarration(step.keyHint, '  >>');
       }
+      getMobileController()?.showDSKYForInput();
       // The key listener (set up in runScenario) will call advanceToNextStep()
       break;
   }

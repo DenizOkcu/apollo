@@ -13,10 +13,13 @@ interface AGCIndex {
   modules: AGCModule[];
 }
 
+import { getMobileController } from './mobile-controller';
+
 let overlayEl: HTMLElement | null = null;
 let sidebarEl: HTMLElement | null = null;
 let sourceEl: HTMLElement | null = null;
 let headerTitleEl: HTMLElement | null = null;
+let layoutEl: HTMLElement | null = null;
 
 let index: AGCIndex | null = null;
 let activeModule: string | null = null;
@@ -171,6 +174,12 @@ function buildSidebar(agcIndex: AGCIndex, initialModule?: string, initialFile?: 
 
       fileEl.addEventListener('click', () => {
         void navigateTo(mod.name, file);
+        if (getMobileController()?.isMobile) {
+          sidebarEl?.classList.remove('sidebar-open');
+          layoutEl?.querySelector('.explorer-sidebar-backdrop')?.classList.remove('active');
+          const tab = layoutEl?.querySelector('.explorer-files-tab') as HTMLElement | null;
+          if (tab) tab.style.display = '';
+        }
       });
 
       listDiv.appendChild(fileEl);
@@ -244,6 +253,33 @@ export async function openExplorer(initialFile?: string | null): Promise<void> {
 
   layout.appendChild(sidebar);
   layout.appendChild(source);
+  layoutEl = layout;
+
+  // Mobile: add FILES tab and sidebar backdrop
+  const mc = getMobileController();
+  if (mc?.isMobile) {
+    const filesTab = document.createElement('button');
+    filesTab.className = 'explorer-files-tab';
+    filesTab.textContent = 'FILES';
+
+    const sidebarBackdrop = document.createElement('div');
+    sidebarBackdrop.className = 'explorer-sidebar-backdrop';
+
+    filesTab.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar-open');
+      sidebarBackdrop.classList.toggle('active');
+      filesTab.style.display = sidebar.classList.contains('sidebar-open') ? 'none' : '';
+    });
+
+    sidebarBackdrop.addEventListener('click', () => {
+      sidebar.classList.remove('sidebar-open');
+      sidebarBackdrop.classList.remove('active');
+      filesTab.style.display = '';
+    });
+
+    layout.appendChild(sidebarBackdrop);
+    layout.appendChild(filesTab);
+  }
 
   overlay.appendChild(header);
   overlay.appendChild(layout);
@@ -276,6 +312,7 @@ export function closeExplorer(): void {
   sidebarEl = null;
   sourceEl = null;
   headerTitleEl = null;
+  layoutEl = null;
   activeModule = null;
   activeFile = null;
 }

@@ -157,12 +157,3 @@
   }
 }
 
-@media (max-width: 768px) {
-  .code-panel {
-    width: unset;
-    min-width: unset;
-    border-left: none;
-    border-top: 1px solid #1a1a1a;
-    max-height: 30vh;
-  }
-}

@@ -223,27 +223,3 @@
   font-weight: bold;
 }
 
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 768px) {
-  .explorer-sidebar {
-    width: 200px;
-  }
-
-  .explorer-source {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 500px) {
-  .explorer-layout {
-    flex-direction: column;
-  }
-
-  .explorer-sidebar {
-    width: 100%;
-    max-height: 35vh;
-    border-right: none;
-    border-bottom: 1px solid #1a1a1a;
-  }
-}
