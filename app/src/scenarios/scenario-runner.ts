@@ -4,6 +4,7 @@ import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../ui/code-vie
 import { setKeyListener, pressKey } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
 import type { AGCCodeBlock } from '../core/agc-source';
+import { clearAlarms } from '../core/alarm';
 
 export interface ScenarioStep {
   delay: number;  // ms to wait AFTER the previous step completes before executing this one
@@ -75,6 +76,35 @@ export function runScenario(scenario: Scenario): void {
   stopScenario();
   clearNarration();
   clearCodeViewer();
+
+  // Reset display state so no lights/flash carry over from a previous scenario
+  clearAlarms();
+  state.lights.compActy = false;
+  state.lights.uplinkActy = false;
+  state.lights.noAtt = false;
+  state.lights.stby = false;
+  state.lights.keyRel = false;
+  state.lights.oprErr = false;
+  state.lights.temp = false;
+  state.lights.gimbalLock = false;
+  state.lights.prog = false;
+  state.lights.restart = false;
+  state.lights.tracker = false;
+  state.lights.alt = false;
+  state.lights.vel = false;
+  state.verbNounFlash = false;
+  state.inputMode = 'idle';
+  state.inputBuffer = '';
+  state.inputTarget = null;
+  state.dataLoadQueue = [];
+  if (state.monitorInterval) {
+    clearInterval(state.monitorInterval);
+    state.monitorInterval = null;
+  }
+  state.monitorActive = false;
+  state.monitorVerb = null;
+  state.monitorNoun = null;
+  notify('display');
 
   currentScenario = scenario;
   currentStepIndex = 0;
@@ -215,16 +245,6 @@ function executeCurrentStep(): void {
       waitingForKey = step.key || null;
       if (step.keyHint) {
         appendNarration(step.keyHint, '  >>');
-      }
-      // Start idle auto-recovery (8s) for when user does nothing at all
-      if (waitingForKey) {
-        const idleKey = waitingForKey;
-        autoRecoveryTimeout = setTimeout(() => {
-          autoRecoveryTimeout = null;
-          if (waitingForKey === idleKey && !cancelled) {
-            pressKey(idleKey);
-          }
-        }, 8000);
       }
       // The key listener (set up in runScenario) will call advanceToNextStep()
       break;

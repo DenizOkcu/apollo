@@ -211,7 +211,7 @@ export const abortScenario: Scenario = {
     {
       delay: 500,
       action: 'setState',
-      stateChanges: { program: 70, verb: 16, noun: 62 },
+      stateChanges: { program: 70, verb: 16, noun: 62, verbNounFlash: false },
     },
 
     // === ABORT STAGING ===

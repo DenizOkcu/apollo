@@ -34,19 +34,19 @@ export function createDisplayPanel(): HTMLElement {
   const lightsCol = document.createElement('div');
   lightsCol.className = 'dsky-lights-column';
 
-  const lightDefs: { key: string; label: string }[] = [
-    { key: 'uplinkActy', label: 'UPLINK\nACTY' },
-    { key: 'noAtt', label: 'NO ATT' },
-    { key: 'stby', label: 'STBY' },
-    { key: 'keyRel', label: 'KEY REL' },
-    { key: 'oprErr', label: 'OPR ERR' },
-    { key: 'temp', label: 'TEMP' },
-    { key: 'gimbalLock', label: 'GIMBAL\nLOCK' },
-    { key: 'prog', label: 'PROG' },
-    { key: 'restart', label: 'RESTART' },
-    { key: 'tracker', label: 'TRACKER' },
-    { key: 'alt', label: 'ALT' },
-    { key: 'vel', label: 'VEL' },
+  const lightDefs: { key: string; label: string; tooltip: string }[] = [
+    { key: 'uplinkActy', label: 'UPLINK\nACTY', tooltip: 'UPLINK ACTY — Lit when the AGC is receiving data from Mission Control.' },
+    { key: 'noAtt', label: 'NO ATT', tooltip: 'NO ATT — The inertial platform has lost its attitude reference.' },
+    { key: 'stby', label: 'STBY', tooltip: 'STBY — The computer is in standby mode to conserve power.' },
+    { key: 'keyRel', label: 'KEY REL', tooltip: 'KEY REL — The computer needs the display back; press KEY REL to release it.' },
+    { key: 'oprErr', label: 'OPR ERR', tooltip: 'OPR ERR — You pressed an invalid key sequence; press RSET to clear.' },
+    { key: 'temp', label: 'TEMP', tooltip: 'TEMP — The stable platform temperature is out of tolerance.' },
+    { key: 'gimbalLock', label: 'GIMBAL\nLOCK', tooltip: 'GIMBAL LOCK — The IMU gimbals are near alignment; attitude must change to avoid losing reference.' },
+    { key: 'prog', label: 'PROG', tooltip: 'PROG — A program alarm has occurred; check the alarm code with V05 N09.' },
+    { key: 'restart', label: 'RESTART', tooltip: 'RESTART — The computer has restarted due to a software or hardware error.' },
+    { key: 'tracker', label: 'TRACKER', tooltip: 'TRACKER — The rendezvous radar or landing radar is tracking a target.' },
+    { key: 'alt', label: 'ALT', tooltip: 'ALT — Altitude data from the landing radar disagrees with the computer\'s estimate.' },
+    { key: 'vel', label: 'VEL', tooltip: 'VEL — Velocity data from the landing radar disagrees with the computer\'s estimate.' },
   ];
 
   const lightElements: Record<string, HTMLElement> = {};
@@ -55,6 +55,7 @@ export function createDisplayPanel(): HTMLElement {
     light.className = 'dsky-light';
     light.dataset.light = def.key;
     light.textContent = def.label;
+    light.title = def.tooltip;
     lightsCol.appendChild(light);
     lightElements[def.key] = light;
   }
@@ -67,16 +68,20 @@ export function createDisplayPanel(): HTMLElement {
   const compActy = document.createElement('div');
   compActy.className = 'dsky-comp-acty';
   compActy.textContent = 'COMP\nACTY';
+  compActy.title = 'COMP ACTY — Flashes when the computer is processing a command.';
 
   // Program row
   const progRow = createLabeledDigitRow('PROG', 2);
+  progRow.container.title = 'PROG — The current program number running on the AGC (e.g. P63 = lunar braking).';
 
   // Verb / Noun row
   const verbNounRow = document.createElement('div');
   verbNounRow.className = 'dsky-verb-noun-row';
 
   const verbGroup = createLabeledDigitRow('VERB', 2);
+  verbGroup.container.title = 'VERB — The action code telling the computer what to do (e.g. V16 = monitor, V35 = lamp test).';
   const nounGroup = createLabeledDigitRow('NOUN', 2);
+  nounGroup.container.title = 'NOUN — The data code telling the computer what to display (e.g. N62 = velocity/time/delta-V).';
 
   verbNounRow.appendChild(verbGroup.container);
   verbNounRow.appendChild(nounGroup.container);
@@ -91,8 +96,11 @@ export function createDisplayPanel(): HTMLElement {
 
   // Registers
   const r1Row = createRegisterRow();
+  r1Row.container.title = 'Register 1 — The first data field; its meaning depends on the active verb/noun.';
   const r2Row = createRegisterRow();
+  r2Row.container.title = 'Register 2 — The second data field; its meaning depends on the active verb/noun.';
   const r3Row = createRegisterRow();
+  r3Row.container.title = 'Register 3 — The third data field; its meaning depends on the active verb/noun.';
 
   // Separators between registers
   const sep2 = document.createElement('div');
