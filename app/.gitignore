@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated AGC source files (built from Apollo-11/)
+public/agc/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

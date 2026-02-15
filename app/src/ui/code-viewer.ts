@@ -1,10 +1,12 @@
 import type { AGCCodeBlock, AGCSourceLine } from '../core/agc-source';
+import { openExplorer } from './code-explorer';
 
 let contentEl: HTMLElement | null = null;
 let headerEl: HTMLElement | null = null;
 let lineQueue: { line: AGCSourceLine; blockTitle: string }[] = [];
 let typeTimer: ReturnType<typeof setInterval> | null = null;
 let currentLineIndex = 0;
+let currentFile: string | null = null;
 
 const LINE_INTERVAL = 120;  // ms between lines appearing
 
@@ -14,8 +16,20 @@ export function createCodeViewer(): HTMLElement {
 
   const header = document.createElement('div');
   header.className = 'code-header';
-  header.textContent = 'AGC SOURCE';
-  headerEl = header;
+
+  const headerText = document.createElement('span');
+  headerText.textContent = 'AGC SOURCE';
+  headerEl = headerText;
+
+  const exploreBtn = document.createElement('button');
+  exploreBtn.className = 'code-explore-btn';
+  exploreBtn.textContent = 'EXPLORE >';
+  exploreBtn.addEventListener('click', () => {
+    void openExplorer(currentFile);
+  });
+
+  header.appendChild(headerText);
+  header.appendChild(exploreBtn);
 
   const content = document.createElement('div');
   content.className = 'code-content';
@@ -31,6 +45,9 @@ export function createCodeViewer(): HTMLElement {
 
 export function showCodeBlock(block: AGCCodeBlock): void {
   if (!contentEl) return;
+
+  // Track current file for the explorer
+  currentFile = block.file;
 
   // Stop any running animation
   stopCodeAnimation();
@@ -102,6 +119,7 @@ export function clearCodeViewer(): void {
   if (headerEl) {
     headerEl.textContent = 'AGC SOURCE';
   }
+  currentFile = null;
 }
 
 export function stopCodeAnimation(): void {

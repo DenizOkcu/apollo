@@ -1,0 +1,245 @@
+/* ===== AGC CODE EXPLORER OVERLAY ===== */
+
+.explorer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.96);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  animation: explorerFadeIn 0.25s ease;
+}
+
+.explorer-overlay.hidden {
+  animation: explorerFadeOut 0.3s ease forwards;
+}
+
+@keyframes explorerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes explorerFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ===== HEADER BAR ===== */
+
+.explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+  background: #0a0a0a;
+}
+
+.explorer-header-title {
+  font-size: 11px;
+  font-weight: bold;
+  color: #00ff41;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.explorer-close {
+  background: none;
+  border: 1px solid #333;
+  color: #666;
+  font-size: 12px;
+  font-family: inherit;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.explorer-close:hover {
+  border-color: #00ff41;
+  color: #00ff41;
+}
+
+/* ===== LAYOUT ===== */
+
+.explorer-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===== SIDEBAR (FILE TREE) ===== */
+
+.explorer-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid #1a1a1a;
+  background: #080808;
+  padding: 8px 0;
+}
+
+.explorer-module-header {
+  padding: 8px 14px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #555;
+  letter-spacing: 2px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explorer-module-header:hover {
+  color: #888;
+}
+
+.explorer-module-header::before {
+  content: '\25B6';
+  font-size: 7px;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.explorer-module-header.expanded::before {
+  transform: rotate(90deg);
+}
+
+.explorer-file-list {
+  display: none;
+}
+
+.explorer-file-list.expanded {
+  display: block;
+}
+
+.explorer-file {
+  padding: 4px 14px 4px 26px;
+  font-size: 11px;
+  color: #4a6a4a;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.1s;
+  letter-spacing: 0.5px;
+}
+
+.explorer-file:hover {
+  color: #7aaa7a;
+  background: rgba(0, 255, 65, 0.03);
+}
+
+.explorer-file.active {
+  color: #00ff41;
+  background: rgba(0, 255, 65, 0.08);
+  border-left: 2px solid #00ff41;
+  padding-left: 24px;
+}
+
+/* ===== SOURCE VIEWER ===== */
+
+.explorer-source {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 8px 0;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  background: #050505;
+}
+
+.explorer-source-loading {
+  padding: 32px;
+  color: #333;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.explorer-source .code-line {
+  padding: 0 12px;
+  white-space: pre;
+  color: #5a7a5a;
+  min-height: 17px;
+}
+
+.explorer-source .code-line.code-blank {
+  min-height: 10px;
+}
+
+.explorer-source .code-linenum {
+  color: #222;
+  user-select: none;
+  display: inline-block;
+  width: 48px;
+  text-align: right;
+  padding-right: 12px;
+}
+
+.explorer-source .code-text {
+  white-space: pre;
+}
+
+/* Reuse the same syntax classes from code.css */
+.explorer-source .code-line.code-comment {
+  color: #3a6a3a;
+}
+
+.explorer-source .code-line.code-highlight {
+  color: #00ff41;
+  background: rgba(0, 255, 65, 0.06);
+  border-left: 2px solid #00ff41;
+  margin-left: -2px;
+  padding-left: 14px;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+}
+
+.explorer-source .code-line.code-highlight .code-text {
+  font-weight: bold;
+}
+
+.explorer-source .code-line.code-label {
+  color: #d4a800;
+}
+
+.explorer-source .code-line.code-label .code-text {
+  font-weight: bold;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .explorer-sidebar {
+    width: 200px;
+  }
+
+  .explorer-source {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 500px) {
+  .explorer-layout {
+    flex-direction: column;
+  }
+
+  .explorer-sidebar {
+    width: 100%;
+    max-height: 35vh;
+    border-right: none;
+    border-bottom: 1px solid #1a1a1a;
+  }
+}

@@ -2,6 +2,7 @@ import './styles/layout.css';
 import './styles/dsky.css';
 import './styles/lights.css';
 import './styles/code.css';
+import './styles/explorer.css';
 
 import { createDisplayPanel } from './dsky/display';
 import { bindPhysicalKeyboard } from './dsky/keyboard';
