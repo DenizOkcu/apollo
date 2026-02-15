@@ -33,7 +33,7 @@ jobs:
 
       - name: Build
         working-directory: app
-        run: npm run build -- --base=/apollo/
+        run: npx tsc && npx vite build --base=/apollo/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
