@@ -1,13 +1,13 @@
 import { state, notify } from './state';
 import { executeVerb, stopMonitor } from './verbs';
+import { triggerOprErr } from '../dsky/opr-err';
 
 export function dispatch(): boolean {
   const verb = state.verb;
   const noun = state.noun;
 
   if (verb === null) {
-    state.lights.oprErr = true;
-    notify('display');
+    triggerOprErr('enter-no-verb');
     return false;
   }
 
@@ -25,8 +25,7 @@ export function dispatch(): boolean {
 
   const result = executeVerb(verb, noun);
   if (!result.ok) {
-    state.lights.oprErr = true;
-    notify('display');
+    triggerOprErr('dispatch-fail');
     return false;
   }
 

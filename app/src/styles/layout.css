@@ -43,7 +43,7 @@ html, body {
 
 .app-subtitle {
   font-size: 10px;
-  color: #555;
+  color: #999;
   letter-spacing: 1px;
 }
 
@@ -54,20 +54,25 @@ html, body {
 }
 
 .btn-scenarios {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: none;
+  border: 1px solid #00ff41;
   color: #00ff41;
   font-family: inherit;
   font-size: 11px;
-  padding: 4px 12px;
+  font-weight: bold;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+  transition: all 0.15s;
 }
 
 .btn-scenarios:hover {
-  background: #222;
-  border-color: #00ff41;
+  background: rgba(0, 255, 65, 0.1);
+  border-color: #33ff66;
+  color: #33ff66;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
 }
 
 /* ===== MAIN CONTENT AREA ===== */
@@ -105,7 +110,7 @@ html, body {
 .dsky-nameplate {
   text-align: center;
   font-size: 10px;
-  color: #444;
+  color: #999;
   letter-spacing: 4px;
   margin-bottom: 12px;
   padding-bottom: 8px;
@@ -210,7 +215,7 @@ html, body {
   padding: 8px 16px;
   font-size: 11px;
   font-weight: bold;
-  color: #444;
+  color: #aaa;
   letter-spacing: 3px;
   border-bottom: 1px solid #1a1a1a;
   flex-shrink: 0;
@@ -278,7 +283,7 @@ html, body {
 
 .help-key {
   font-size: 10px;
-  color: #555;
+  color: #999;
   white-space: nowrap;
 }
 
@@ -341,14 +346,14 @@ html, body {
 
 .scenario-subtitle {
   font-size: 12px;
-  color: #555;
+  color: #999;
   letter-spacing: 2px;
   margin-bottom: 24px;
 }
 
 .scenario-desc {
   font-size: 14px;
-  color: #777;
+  color: #bbb;
   margin-bottom: 32px;
 }
 
@@ -389,8 +394,8 @@ html, body {
 .scenario-badge {
   display: inline-block;
   font-size: 9px;
-  color: #888;
-  border: 1px solid #333;
+  color: #aaa;
+  border: 1px solid #444;
   border-radius: 10px;
   padding: 2px 8px;
   letter-spacing: 1px;
@@ -399,13 +404,13 @@ html, body {
 
 .scenario-card-desc {
   font-size: 12px;
-  color: #777;
+  color: #bbb;
   line-height: 1.5;
 }
 
 .scenario-footer {
   font-size: 10px;
-  color: #333;
+  color: #888;
   letter-spacing: 1px;
 }
 

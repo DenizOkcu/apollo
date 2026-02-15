@@ -1,6 +1,7 @@
 import { state, notify, blankReg } from '../core/state';
 import { dispatch, completeProgramChange, completeDataLoad } from '../core/cpu';
 import { clearAlarms } from '../core/alarm';
+import { triggerOprErr } from './opr-err';
 
 export type DSKYKey =
   | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -135,8 +136,7 @@ function handleDigit(digit: string): void {
   }
 
   // Not in any input mode — operator error
-  state.lights.oprErr = true;
-  notify('display');
+  triggerOprErr('digit-idle');
 }
 
 function handleSign(sign: '+' | '-'): void {
@@ -155,8 +155,7 @@ function handleSign(sign: '+' | '-'): void {
   }
 
   // Sign not valid outside data entry
-  state.lights.oprErr = true;
-  notify('display');
+  triggerOprErr('sign-idle');
 }
 
 function handleEnter(): void {
@@ -201,8 +200,7 @@ function handleEnter(): void {
       }
     } else {
       // Not enough digits
-      state.lights.oprErr = true;
-      notify('display');
+      triggerOprErr('enter-no-data');
     }
     return;
   }
@@ -213,8 +211,7 @@ function handleEnter(): void {
     return;
   }
 
-  state.lights.oprErr = true;
-  notify('display');
+  triggerOprErr('enter-no-verb');
 }
 
 function handleClear(): void {

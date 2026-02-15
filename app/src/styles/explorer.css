@@ -42,7 +42,7 @@
 .explorer-header-title {
   font-size: 11px;
   font-weight: bold;
-  color: #00ff41;
+  color: #aaa;
   letter-spacing: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -52,21 +52,25 @@
 
 .explorer-close {
   background: none;
-  border: 1px solid #333;
-  color: #666;
+  border: 1px solid #ff4444;
+  color: #ff4444;
   font-size: 12px;
   font-family: inherit;
+  font-weight: bold;
   letter-spacing: 2px;
   padding: 4px 12px;
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
   margin-left: 16px;
+  text-shadow: 0 0 6px rgba(255, 68, 68, 0.3);
 }
 
 .explorer-close:hover {
-  border-color: #00ff41;
-  color: #00ff41;
+  background: rgba(255, 68, 68, 0.1);
+  border-color: #ff6666;
+  color: #ff6666;
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
 }
 
 /* ===== LAYOUT ===== */
@@ -92,7 +96,7 @@
   padding: 8px 14px;
   font-size: 9px;
   font-weight: bold;
-  color: #555;
+  color: #7a9a7a;
   letter-spacing: 2px;
   cursor: pointer;
   user-select: none;
@@ -103,7 +107,7 @@
 }
 
 .explorer-module-header:hover {
-  color: #888;
+  color: #a0cca0;
 }
 
 .explorer-module-header::before {
@@ -128,7 +132,7 @@
 .explorer-file {
   padding: 4px 14px 4px 26px;
   font-size: 11px;
-  color: #4a6a4a;
+  color: #8aba8a;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -138,8 +142,8 @@
 }
 
 .explorer-file:hover {
-  color: #7aaa7a;
-  background: rgba(0, 255, 65, 0.03);
+  color: #b0e0b0;
+  background: rgba(0, 255, 65, 0.05);
 }
 
 .explorer-file.active {
@@ -164,7 +168,7 @@
 
 .explorer-source-loading {
   padding: 32px;
-  color: #333;
+  color: #6a9a6a;
   font-size: 12px;
   letter-spacing: 2px;
 }
@@ -172,7 +176,7 @@
 .explorer-source .code-line {
   padding: 0 12px;
   white-space: pre;
-  color: #5a7a5a;
+  color: #8aaa8a;
   min-height: 17px;
 }
 
@@ -181,7 +185,7 @@
 }
 
 .explorer-source .code-linenum {
-  color: #222;
+  color: #445544;
   user-select: none;
   display: inline-block;
   width: 48px;
@@ -195,16 +199,16 @@
 
 /* Reuse the same syntax classes from code.css */
 .explorer-source .code-line.code-comment {
-  color: #3a6a3a;
+  color: #6a9a6a;
 }
 
 .explorer-source .code-line.code-highlight {
-  color: #00ff41;
-  background: rgba(0, 255, 65, 0.06);
-  border-left: 2px solid #00ff41;
+  color: #33ff66;
+  background: rgba(0, 255, 65, 0.08);
+  border-left: 2px solid #33ff66;
   margin-left: -2px;
   padding-left: 14px;
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
 }
 
 .explorer-source .code-line.code-highlight .code-text {
@@ -212,7 +216,7 @@
 }
 
 .explorer-source .code-line.code-label {
-  color: #d4a800;
+  color: #e0ba30;
 }
 
 .explorer-source .code-line.code-label .code-text {

@@ -1,7 +1,7 @@
 import { state, notify } from '../core/state';
 import { appendNarration, clearNarration } from '../ui/panel';
 import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../ui/code-viewer';
-import { setKeyListener } from '../dsky/keyboard';
+import { setKeyListener, pressKey } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
 import type { AGCCodeBlock } from '../core/agc-source';
 
@@ -32,6 +32,44 @@ let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
 let waitingForKey: DSKYKey | null = null;
 let telemetryInterval: ReturnType<typeof setInterval> | null = null;
 let cancelled = false;
+let nudgeShown = false;
+let autoRecoveryTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const KEY_LABELS: Record<string, string> = {
+  VERB: 'V (VERB)',
+  NOUN: 'N (NOUN)',
+  ENTER: 'ENTER',
+  PRO: 'P (PRO)',
+  RSET: 'R (RSET)',
+  KEY_REL: 'K (KEY REL)',
+  CLR: 'C (CLR)',
+  PLUS: '+ (PLUS)',
+  MINUS: '- (MINUS)',
+};
+
+function getNudgeMessage(expected: DSKYKey, _pressed: DSKYKey): string {
+  switch (expected) {
+    case 'VERB':
+      return 'Not quite — start by pressing V (VERB) to begin the command.';
+    case 'ENTER':
+      return 'Almost there — press ENTER when you\'re ready to execute.';
+    case 'PRO':
+      return 'The computer is waiting for your confirmation — press P (PRO) to proceed.';
+    case 'RSET':
+      return 'Press R (RSET) to acknowledge and clear the alarm.';
+    case 'KEY_REL':
+      return 'The computer needs the display back — press K (KEY REL) to release it.';
+    default:
+      return `Not quite — try pressing ${KEY_LABELS[expected] || expected}.`;
+  }
+}
+
+function clearAutoRecovery(): void {
+  if (autoRecoveryTimeout) {
+    clearTimeout(autoRecoveryTimeout);
+    autoRecoveryTimeout = null;
+  }
+}
 
 export function runScenario(scenario: Scenario): void {
   stopScenario();
@@ -45,9 +83,25 @@ export function runScenario(scenario: Scenario): void {
 
   setKeyListener((key) => {
     if (waitingForKey && key === waitingForKey) {
+      clearAutoRecovery();
+      nudgeShown = false;
       waitingForKey = null;
       // Key matched — advance to next step immediately
       advanceToNextStep();
+    } else if (waitingForKey) {
+      // Wrong key — show nudge once and start/restart auto-recovery
+      if (!nudgeShown) {
+        nudgeShown = true;
+        appendNarration(getNudgeMessage(waitingForKey, key));
+      }
+      clearAutoRecovery();
+      const expectedKey = waitingForKey;
+      autoRecoveryTimeout = setTimeout(() => {
+        autoRecoveryTimeout = null;
+        if (waitingForKey === expectedKey && !cancelled) {
+          pressKey(expectedKey);
+        }
+      }, 5000);
     }
   });
 
@@ -60,6 +114,8 @@ export function stopScenario(): void {
   currentScenario = null;
   currentStepIndex = 0;
   waitingForKey = null;
+  nudgeShown = false;
+  clearAutoRecovery();
 
   if (pendingTimeout) {
     clearTimeout(pendingTimeout);
@@ -154,9 +210,21 @@ function executeCurrentStep(): void {
 
     case 'waitForKey':
       // BLOCK here — do NOT advance until the key is pressed
+      nudgeShown = false;
+      clearAutoRecovery();
       waitingForKey = step.key || null;
       if (step.keyHint) {
         appendNarration(step.keyHint, '  >>');
+      }
+      // Start idle auto-recovery (8s) for when user does nothing at all
+      if (waitingForKey) {
+        const idleKey = waitingForKey;
+        autoRecoveryTimeout = setTimeout(() => {
+          autoRecoveryTimeout = null;
+          if (waitingForKey === idleKey && !cancelled) {
+            pressKey(idleKey);
+          }
+        }, 8000);
       }
       // The key listener (set up in runScenario) will call advanceToNextStep()
       break;

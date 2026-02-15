@@ -23,7 +23,7 @@ export function createCodeViewer(): HTMLElement {
 
   const exploreBtn = document.createElement('button');
   exploreBtn.className = 'code-explore-btn';
-  exploreBtn.textContent = 'EXPLORE >';
+  exploreBtn.textContent = 'EXPLORE CODE';
   exploreBtn.addEventListener('click', () => {
     void openExplorer(currentFile);
   });

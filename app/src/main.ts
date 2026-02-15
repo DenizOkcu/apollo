@@ -36,7 +36,7 @@ function init(): void {
       <div class="app-subtitle">DSKY TERMINAL EMULATOR</div>
     </div>
     <div class="header-right">
-      <button class="btn-scenarios" id="btn-scenarios">SCENARIOS</button>
+      <button class="btn-scenarios" id="btn-scenarios">BACK TO SCENARIOS</button>
     </div>
   `;
 

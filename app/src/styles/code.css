@@ -14,7 +14,7 @@
   padding: 8px 12px;
   font-size: 10px;
   font-weight: bold;
-  color: #444;
+  color: #aaa;
   letter-spacing: 2px;
   border-bottom: 1px solid #1a1a1a;
   flex-shrink: 0;
@@ -29,8 +29,8 @@
 
 .code-explore-btn {
   background: none;
-  border: 1px solid #222;
-  color: #444;
+  border: 1px solid #00ff41;
+  color: #00ff41;
   font-family: inherit;
   font-size: 9px;
   font-weight: bold;
@@ -39,11 +39,14 @@
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
 }
 
 .code-explore-btn:hover {
-  border-color: #00ff41;
-  color: #00ff41;
+  background: rgba(0, 255, 65, 0.1);
+  border-color: #33ff66;
+  color: #33ff66;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
 }
 
 .code-content {
@@ -63,7 +66,7 @@
   color: #00ff41;
   font-size: 10px;
   letter-spacing: 1px;
-  opacity: 0.5;
+  opacity: 0.8;
   border-bottom: 1px solid #111;
   margin-bottom: 4px;
 }
@@ -73,7 +76,7 @@
 .code-line {
   padding: 0 12px;
   white-space: pre;
-  color: #5a7a5a;
+  color: #8aaa8a;
   min-height: 17px;
   animation: codeFadeIn 0.15s ease;
 }
@@ -94,7 +97,7 @@
 }
 
 .code-linenum {
-  color: #222;
+  color: #555;
   user-select: none;
   display: inline-block;
   width: 20px;
@@ -104,9 +107,9 @@
   white-space: pre;
 }
 
-/* Regular comments — dim green */
+/* Regular comments — green */
 .code-line.code-comment {
-  color: #3a6a3a;
+  color: #6a9a6a;
 }
 
 /* Highlighted developer comments — bright, glowing */
