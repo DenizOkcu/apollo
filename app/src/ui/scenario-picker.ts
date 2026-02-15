@@ -19,6 +19,24 @@ const SCENARIOS: ScenarioChoice[] = [
     difficulty: 'Guided',
   },
   {
+    id: 'tli',
+    title: 'Launch to the Moon',
+    description: 'Trans-Lunar Injection: the S-IVB fires and Apollo 11 leaves Earth orbit. Velocity builds to escape speed — after this, there is no turning back.',
+    difficulty: 'Guided',
+  },
+  {
+    id: 'lunar-ascent',
+    title: 'The Ascent',
+    description: 'Lift off from the Moon. One engine, no backup, never tested. If it doesn\'t ignite, the crew dies on the surface.',
+    difficulty: 'Guided',
+  },
+  {
+    id: 'abort',
+    title: 'Abort!',
+    description: 'What if Steve Bales had called NO-GO? A "what-if" scenario: abort the landing and fire the ascent engine to escape.',
+    difficulty: 'Guided',
+  },
+  {
     id: 'free-play',
     title: 'Explore Freely',
     description: 'Full DSKY access. Type any verb/noun combination and explore the AGC interface at your own pace.',

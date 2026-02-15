@@ -16,12 +16,18 @@ import { landingScenario } from './scenarios/landing';
 import { alarm1202Scenario } from './scenarios/alarm-1202';
 import { freePlayScenario } from './scenarios/free-play';
 import { lampTestScenario } from './scenarios/lamp-test';
+import { lunarAscentScenario } from './scenarios/lunar-ascent';
+import { abortScenario } from './scenarios/abort';
+import { tliScenario } from './scenarios/tli';
 
 const SCENARIOS: Record<string, Scenario> = {
   'landing': landingScenario,
   'alarm-1202': alarm1202Scenario,
   'free-play': freePlayScenario,
   'lamp-test': lampTestScenario,
+  'lunar-ascent': lunarAscentScenario,
+  'abort': abortScenario,
+  'tli': tliScenario,
 };
 
 function init(): void {
