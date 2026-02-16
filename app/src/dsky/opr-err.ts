@@ -1,5 +1,5 @@
-import { state, notify } from '../core/state';
-import { appendNarration } from '../ui/panel';
+import { getState, notify } from '../core/state';
+import { appendNarration } from '../composables/useNarration';
 
 const hintMessages: Record<string, string> = {
   'digit-idle': 'You need to press VERB or NOUN first before entering digits.',
@@ -12,6 +12,7 @@ const hintMessages: Record<string, string> = {
 let lastHintTime = 0;
 
 export function triggerOprErr(context: string): void {
+  const state = getState();
   state.lights.oprErr = true;
   notify('display');
 

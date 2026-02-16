@@ -1,4 +1,4 @@
-import { state, notify } from '../core/state';
+import { getState, notify } from '../core/state';
 import { startTelemetry, stopTelemetry } from './scenario-runner';
 import type { Scenario } from './scenario-runner';
 import { getNounDef, formatNounValue } from '../core/nouns';
@@ -8,6 +8,7 @@ import {
 } from '../core/agc-source';
 
 function updateDisplayFromNav(): void {
+  const state = getState();
   const noun = state.noun;
   if (noun === null) return;
   const def = getNounDef(noun);

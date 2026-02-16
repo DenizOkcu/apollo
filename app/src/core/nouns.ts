@@ -1,4 +1,4 @@
-import type { AGCState } from './state';
+import type { AGCState } from '../stores/agc';
 import { formatMETForDisplay, formatMinSec } from './clock';
 
 export type FormatType =

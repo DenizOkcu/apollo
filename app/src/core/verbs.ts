@@ -1,4 +1,4 @@
-import { state, notify, blankReg } from './state';
+import { getState, notify, blankReg } from './state';
 import { getNounDef, formatNounValue } from './nouns';
 import { displayAlarms, clearAlarms } from './alarm';
 
@@ -8,6 +8,7 @@ export interface VerbResult {
 }
 
 function applyNounToRegisters(verb: number): VerbResult {
+  const state = getState();
   const noun = state.noun;
   if (noun === null) return { ok: false, error: 'No noun' };
 
@@ -48,6 +49,7 @@ function applyNounToRegisters(verb: number): VerbResult {
 
 function startMonitor(): void {
   stopMonitor();
+  const state = getState();
   state.monitorActive = true;
   state.monitorVerb = state.verb;
   state.monitorNoun = state.noun;
@@ -57,16 +59,18 @@ function startMonitor(): void {
 
   // Then every second
   state.monitorInterval = setInterval(() => {
-    if (state.monitorActive && state.monitorVerb !== null && state.monitorNoun !== null) {
-      const savedNoun = state.noun;
-      state.noun = state.monitorNoun;
-      applyNounToRegisters(state.monitorVerb!);
-      state.noun = savedNoun;
+    const s = getState();
+    if (s.monitorActive && s.monitorVerb !== null && s.monitorNoun !== null) {
+      const savedNoun = s.noun;
+      s.noun = s.monitorNoun;
+      applyNounToRegisters(s.monitorVerb!);
+      s.noun = savedNoun;
     }
   }, 1000);
 }
 
 export function stopMonitor(): void {
+  const state = getState();
   state.monitorActive = false;
   if (state.monitorInterval) {
     clearInterval(state.monitorInterval);
@@ -75,6 +79,7 @@ export function stopMonitor(): void {
 }
 
 function startDataLoad(): VerbResult {
+  const state = getState();
   const noun = state.noun;
   if (noun === null) return { ok: false, error: 'No noun' };
 
@@ -103,6 +108,7 @@ function startDataLoad(): VerbResult {
 }
 
 function lampTest(): VerbResult {
+  const state = getState();
   // Turn on all lights
   const lightKeys = Object.keys(state.lights) as (keyof typeof state.lights)[];
   for (const key of lightKeys) {
@@ -125,13 +131,14 @@ function lampTest(): VerbResult {
 
   // Restore after 5 seconds
   setTimeout(() => {
-    const keys2 = Object.keys(state.lights) as (keyof typeof state.lights)[];
+    const s = getState();
+    const keys2 = Object.keys(s.lights) as (keyof typeof s.lights)[];
     for (const key of keys2) {
-      state.lights[key] = false;
+      s.lights[key] = false;
     }
-    state.verb = null;
-    state.noun = null;
-    state.program = state.program === 88 ? null : state.program;
+    s.verb = null;
+    s.noun = null;
+    s.program = s.program === 88 ? null : s.program;
     blankReg('r1');
     blankReg('r2');
     blankReg('r3');
@@ -142,6 +149,7 @@ function lampTest(): VerbResult {
 }
 
 function freshStart(): VerbResult {
+  const state = getState();
   stopMonitor();
   state.verb = null;
   state.noun = null;
@@ -166,18 +174,18 @@ function freshStart(): VerbResult {
 }
 
 function changeProgram(): VerbResult {
+  const state = getState();
   // V37: expect next input to be a 2-digit program number
   state.verbNounFlash = true;
   state.inputMode = 'awaitingNoun';  // reuse noun input for program number
   state.inputTarget = 'noun';
   state.inputBuffer = '';
-  // The keyboard handler will interpret the entered digits as a program number
-  // when verb is 37
   notify('display');
   return { ok: true };
 }
 
 export function executeVerb(verb: number, noun: number | null): VerbResult {
+  const state = getState();
   state.verb = verb;
   if (noun !== null) state.noun = noun;
 

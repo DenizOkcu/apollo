@@ -1,4 +1,4 @@
-import { state, notify, blankReg } from '../core/state';
+import { getState, notify, blankReg } from '../core/state';
 import { dispatch, completeProgramChange, completeDataLoad } from '../core/cpu';
 import { clearAlarms } from '../core/alarm';
 import { triggerOprErr } from './opr-err';
@@ -22,6 +22,8 @@ let dataSign: '+' | '-' = '+';
 let dataBuffer = '';
 
 export function pressKey(key: DSKYKey): void {
+  const state = getState();
+
   // Notify external listeners (for scenarios)
   if (externalKeyListener) {
     externalKeyListener(key);
@@ -31,7 +33,8 @@ export function pressKey(key: DSKYKey): void {
   state.lights.compActy = true;
   notify('display');
   setTimeout(() => {
-    state.lights.compActy = false;
+    const s = getState();
+    s.lights.compActy = false;
     notify('display');
   }, 150);
 
@@ -71,29 +74,30 @@ export function pressKey(key: DSKYKey): void {
 }
 
 function handleVerb(): void {
+  const state = getState();
   state.inputMode = 'awaitingVerb';
   state.inputTarget = 'verb';
   verbBuffer = '';
-  // Blank verb display while entering
   state.verb = null;
   notify('display');
 }
 
 function handleNoun(): void {
+  const state = getState();
   state.inputMode = 'awaitingNoun';
   state.inputTarget = 'noun';
   nounBuffer = '';
-  // Blank noun display while entering
   state.noun = null;
   notify('display');
 }
 
 function handleDigit(digit: string): void {
+  const state = getState();
+
   if (state.inputMode === 'awaitingVerb') {
     verbBuffer += digit;
-    // Show partial entry
     if (verbBuffer.length === 1) {
-      state.verb = parseInt(digit, 10) * 10;  // show first digit in tens place
+      state.verb = parseInt(digit, 10) * 10;
     }
     if (verbBuffer.length >= 2) {
       state.verb = parseInt(verbBuffer.slice(0, 2), 10);
@@ -121,7 +125,6 @@ function handleDigit(digit: string): void {
   if (state.inputMode === 'awaitingData') {
     if (dataBuffer.length < 5) {
       dataBuffer += digit;
-      // Update display to show digits being entered
       const reg = state.inputTarget as 'r1' | 'r2' | 'r3';
       if (reg) {
         const padded = dataBuffer.padEnd(5, ' ');
@@ -140,6 +143,8 @@ function handleDigit(digit: string): void {
 }
 
 function handleSign(sign: '+' | '-'): void {
+  const state = getState();
+
   if (state.inputMode === 'awaitingData') {
     dataSign = sign;
     dataBuffer = '';
@@ -154,18 +159,18 @@ function handleSign(sign: '+' | '-'): void {
     return;
   }
 
-  // Sign not valid outside data entry
   triggerOprErr('sign-idle');
 }
 
 function handleEnter(): void {
+  const state = getState();
+
   if (state.inputMode === 'awaitingVerb') {
     if (verbBuffer.length > 0) {
       state.verb = parseInt(verbBuffer.padEnd(2, '0'), 10);
     }
     state.inputMode = 'idle';
     state.inputTarget = null;
-    // Don't dispatch yet — wait for noun
     notify('display');
     return;
   }
@@ -173,7 +178,6 @@ function handleEnter(): void {
   if (state.inputMode === 'awaitingNoun') {
     if (nounBuffer.length > 0) {
       const num = parseInt(nounBuffer.padEnd(2, '0'), 10);
-      // If V37, this is a program number
       if (state.verb === 37) {
         completeProgramChange(num);
         return;
@@ -183,7 +187,6 @@ function handleEnter(): void {
     state.inputMode = 'idle';
     state.inputTarget = null;
 
-    // If we have both verb and noun, dispatch
     if (state.verb !== null) {
       dispatch();
     }
@@ -199,13 +202,11 @@ function handleEnter(): void {
         dataBuffer = '';
       }
     } else {
-      // Not enough digits
       triggerOprErr('enter-no-data');
     }
     return;
   }
 
-  // Idle mode with verb/noun set — dispatch
   if (state.verb !== null) {
     dispatch();
     return;
@@ -215,6 +216,8 @@ function handleEnter(): void {
 }
 
 function handleClear(): void {
+  const state = getState();
+
   if (state.inputMode === 'awaitingVerb') {
     verbBuffer = '';
     state.verb = null;
@@ -239,7 +242,6 @@ function handleClear(): void {
     }
     return;
   }
-  // Clear everything visible
   blankReg('r1');
   blankReg('r2');
   blankReg('r3');
@@ -247,6 +249,7 @@ function handleClear(): void {
 }
 
 function handleProceed(): void {
+  const state = getState();
   state.verbNounFlash = false;
   state.inputMode = 'idle';
   state.inputTarget = null;
@@ -255,11 +258,13 @@ function handleProceed(): void {
 }
 
 function handleKeyRelease(): void {
+  const state = getState();
   state.lights.keyRel = false;
   notify('display');
 }
 
 function handleReset(): void {
+  const state = getState();
   state.lights.oprErr = false;
   state.lights.prog = false;
   clearAlarms();
@@ -276,7 +281,7 @@ const KEY_MAP: Record<string, DSKYKey> = {
   'p': 'PRO',
   'k': 'KEY_REL',
   'r': 'RSET',
-  '+': 'PLUS', '=': 'PLUS',  // = is shift-less + on most keyboards
+  '+': 'PLUS', '=': 'PLUS',
   '-': 'MINUS',
 };
 

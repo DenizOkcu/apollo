@@ -7,11 +7,17 @@
     "predev": "node scripts/build-agc-index.js",
     "dev": "vite",
     "prebuild": "node scripts/build-agc-index.js",
-    "build": "tsc && vite build",
+    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "pinia": "^3.0.4"
+  },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.4",
     "typescript": "~5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vue-tsc": "^3.2.4"
   }
 }

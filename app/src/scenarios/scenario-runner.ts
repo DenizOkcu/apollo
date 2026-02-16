@@ -1,24 +1,23 @@
-import { state, notify } from '../core/state';
-import { appendNarration, clearNarration } from '../ui/panel';
-import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../ui/code-viewer';
+import { getState, notify } from '../core/state';
+import { appendNarration, clearNarration } from '../composables/useNarration';
+import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../composables/useCodeAnimation';
 import { setKeyListener, pressKey } from '../dsky/keyboard';
 import type { DSKYKey } from '../dsky/keyboard';
 import type { AGCCodeBlock } from '../core/agc-source';
 import { clearAlarms } from '../core/alarm';
-import { getMobileController } from '../ui/mobile-controller';
 
 export interface ScenarioStep {
   delay: number;  // ms to wait AFTER the previous step completes before executing this one
   action: 'narrate' | 'setState' | 'waitForKey' | 'setNav' | 'setLights' | 'callback' | 'showCode';
   text?: string;
   timestamp?: string;
-  stateChanges?: Partial<typeof state>;
-  navChanges?: Partial<typeof state.nav>;
-  lightChanges?: Partial<typeof state.lights>;
+  stateChanges?: Record<string, unknown>;
+  navChanges?: Record<string, unknown>;
+  lightChanges?: Record<string, unknown>;
   key?: DSKYKey;
-  keyHint?: string;  // shown as a highlighted prompt to the user
+  keyHint?: string;
   callback?: () => void;
-  codeBlock?: AGCCodeBlock;  // AGC source code block to display
+  codeBlock?: AGCCodeBlock;
 }
 
 export interface Scenario {
@@ -78,7 +77,9 @@ export function runScenario(scenario: Scenario): void {
   clearNarration();
   clearCodeViewer();
 
-  // Reset display state so no lights/flash carry over from a previous scenario
+  const state = getState();
+
+  // Reset display state
   clearAlarms();
   state.lights.compActy = false;
   state.lights.uplinkActy = false;
@@ -111,18 +112,14 @@ export function runScenario(scenario: Scenario): void {
   currentStepIndex = 0;
   cancelled = false;
   state.scenarioActive = true;
-  getMobileController()?.setFreePlayMode(scenario.id === 'free-play');
 
   setKeyListener((key) => {
     if (waitingForKey && key === waitingForKey) {
       clearAutoRecovery();
       nudgeShown = false;
       waitingForKey = null;
-      getMobileController()?.hideDSKYAfterInput();
-      // Key matched — advance to next step immediately
       advanceToNextStep();
     } else if (waitingForKey) {
-      // Wrong key — show nudge once and start/restart auto-recovery
       if (!nudgeShown) {
         nudgeShown = true;
         appendNarration(getNudgeMessage(waitingForKey, key));
@@ -138,7 +135,6 @@ export function runScenario(scenario: Scenario): void {
     }
   });
 
-  // Begin processing from the first step
   scheduleNextStep();
 }
 
@@ -160,6 +156,7 @@ export function stopScenario(): void {
     telemetryInterval = null;
   }
 
+  const state = getState();
   state.scenarioActive = false;
   setKeyListener(null);
 }
@@ -167,8 +164,8 @@ export function stopScenario(): void {
 function scheduleNextStep(): void {
   if (cancelled || !currentScenario) return;
   if (currentStepIndex >= currentScenario.steps.length) {
-    // Scenario complete
     if (currentScenario.onComplete) currentScenario.onComplete();
+    const state = getState();
     state.scenarioActive = false;
     setKeyListener(null);
     return;
@@ -182,7 +179,6 @@ function scheduleNextStep(): void {
       executeCurrentStep();
     }, step.delay);
   } else {
-    // Zero delay — execute immediately (but yield to let DOM update)
     pendingTimeout = setTimeout(() => {
       pendingTimeout = null;
       executeCurrentStep();
@@ -195,6 +191,7 @@ function executeCurrentStep(): void {
   if (currentStepIndex >= currentScenario.steps.length) return;
 
   const step = currentScenario.steps[currentStepIndex];
+  const state = getState();
 
   switch (step.action) {
     case 'narrate':
@@ -242,15 +239,12 @@ function executeCurrentStep(): void {
       break;
 
     case 'waitForKey':
-      // BLOCK here — do NOT advance until the key is pressed
       nudgeShown = false;
       clearAutoRecovery();
       waitingForKey = step.key || null;
       if (step.keyHint) {
         appendNarration(step.keyHint, '  >>');
       }
-      getMobileController()?.showDSKYForInput();
-      // The key listener (set up in runScenario) will call advanceToNextStep()
       break;
   }
 }
@@ -263,32 +257,33 @@ function advanceToNextStep(): void {
 // Helper: start a telemetry animation that interpolates nav values over time
 export function startTelemetry(
   duration: number,
-  from: Partial<typeof state.nav>,
-  to: Partial<typeof state.nav>,
+  from: Record<string, number>,
+  to: Record<string, number>,
   onTick?: () => void
 ): void {
   if (telemetryInterval) clearInterval(telemetryInterval);
 
+  const state = getState();
   const startTime = Date.now();
   const startValues: Record<string, number> = {};
   const endValues: Record<string, number> = {};
 
-  for (const key of Object.keys(to) as (keyof typeof state.nav)[]) {
-    startValues[key] = from[key] ?? state.nav[key];
+  for (const key of Object.keys(to)) {
+    startValues[key] = (from[key] ?? (state.nav as Record<string, number>)[key]) as number;
     endValues[key] = to[key]!;
   }
 
   telemetryInterval = setInterval(() => {
+    const s = getState();
     const elapsed = Date.now() - startTime;
     const t = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - t, 2);
 
     for (const key of Object.keys(endValues)) {
-      const navKey = key as keyof typeof state.nav;
-      (state.nav as any)[navKey] = startValues[key] + (endValues[key] - startValues[key]) * eased;
+      (s.nav as Record<string, number>)[key] = startValues[key] + (endValues[key] - startValues[key]) * eased;
     }
 
-    if (state.monitorActive || onTick) {
+    if (s.monitorActive || onTick) {
       notify('display');
       if (onTick) onTick();
     }

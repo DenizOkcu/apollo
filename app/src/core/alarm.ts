@@ -1,6 +1,7 @@
-import { state, notify } from './state';
+import { getState, notify } from './state';
 
 export function triggerAlarm(code: number): void {
+  const state = getState();
   // Store in first available failreg slot
   if (state.failreg[0] === 0) {
     state.failreg[0] = code;
@@ -16,6 +17,7 @@ export function triggerAlarm(code: number): void {
 }
 
 export function displayAlarms(): void {
+  const state = getState();
   state.verb = 5;
   state.noun = 9;
   state.verbNounFlash = true;
@@ -32,6 +34,7 @@ export function displayAlarms(): void {
 }
 
 function setOctalRegister(reg: 'r1' | 'r2' | 'r3', value: number): void {
+  const state = getState();
   const str = value.toString(8).padStart(5, '0').slice(-5);
   state[reg] = {
     sign: null,
@@ -40,6 +43,7 @@ function setOctalRegister(reg: 'r1' | 'r2' | 'r3', value: number): void {
 }
 
 export function clearAlarms(): void {
+  const state = getState();
   state.failreg = [0, 0, 0];
   state.lights.prog = false;
   notify('alarm');

@@ -1,4 +1,4 @@
-import { state, notify } from '../core/state';
+import { getState, notify } from '../core/state';
 import { startTelemetry, stopTelemetry } from './scenario-runner';
 import type { Scenario } from './scenario-runner';
 import { triggerAlarm, displayAlarms, clearAlarms } from '../core/alarm';
@@ -9,6 +9,7 @@ import {
 } from '../core/agc-source';
 
 function updateDisplayFromNav(): void {
+  const state = getState();
   const noun = state.noun;
   if (noun === null) return;
   const def = getNounDef(noun);
@@ -185,6 +186,7 @@ export const alarm1202Scenario: Scenario = {
       delay: 0,
       action: 'callback',
       callback: () => {
+        const state = getState();
         state.lights.oprErr = false;
         state.lights.prog = false;
         notify('display');
@@ -212,6 +214,7 @@ export const alarm1202Scenario: Scenario = {
       delay: 0,
       action: 'callback',
       callback: () => {
+        const state = getState();
         clearAlarms();
         state.verb = 16;
         state.noun = 62;

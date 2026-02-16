@@ -1,10 +1,11 @@
-import { state, notify } from './state';
+import { getState, notify } from './state';
 
 let clockTimer: ReturnType<typeof setInterval> | null = null;
 
 export function startClock(): void {
   if (clockTimer) return;
   clockTimer = setInterval(() => {
+    const state = getState();
     if (state.clockRunning) {
       state.missionElapsedTime += 1;  // 1 centisecond per 10ms
       // Don't notify every tick — display will poll on monitor interval
@@ -20,11 +21,13 @@ export function stopClock(): void {
 }
 
 export function setMET(centiseconds: number): void {
+  const state = getState();
   state.missionElapsedTime = centiseconds;
   notify('clock');
 }
 
 export function getMETComponents(): { hours: number; minutes: number; seconds: number; centiseconds: number } {
+  const state = getState();
   const total = Math.floor(state.missionElapsedTime);
   const cs = total % 100;
   const totalSeconds = Math.floor(total / 100);
@@ -37,9 +40,6 @@ export function getMETComponents(): { hours: number; minutes: number; seconds: n
 
 export function formatMETForDisplay(): [number, number, number] {
   const { hours, minutes, seconds, centiseconds } = getMETComponents();
-  // R1 = hours as 5 digits (00XXX)
-  // R2 = minutes as 5 digits (000XX)
-  // R3 = seconds.centiseconds as 5 digits (XXX.XX → XXXXX with implicit decimal)
   return [hours, minutes, seconds * 100 + centiseconds];
 }
 

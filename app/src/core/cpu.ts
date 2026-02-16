@@ -1,10 +1,11 @@
-import { state, notify } from './state';
+import { getState, notify } from './state';
 import { executeVerb, stopMonitor } from './verbs';
 import { triggerOprErr } from '../dsky/opr-err';
 import { getCodeBlockForCommand } from './verb-code-map';
-import { showCodeBlock, clearCodeViewer } from '../ui/code-viewer';
+import { showCodeBlock, clearCodeViewer } from '../composables/useCodeAnimation';
 
 export function dispatch(): boolean {
+  const state = getState();
   const verb = state.verb;
   const noun = state.noun;
 
@@ -50,6 +51,7 @@ export function dispatch(): boolean {
 }
 
 export function completeProgramChange(programNumber: number): void {
+  const state = getState();
   stopMonitor();
   state.program = programNumber;
   state.verb = null;
@@ -70,6 +72,7 @@ export function completeProgramChange(programNumber: number): void {
 }
 
 export function completeDataLoad(reg: 'r1' | 'r2' | 'r3', sign: '+' | '-', digits: string): void {
+  const state = getState();
   state[reg] = {
     sign,
     digits: digits.padStart(5, '0').split('').map(Number),
