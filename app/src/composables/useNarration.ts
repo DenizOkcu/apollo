@@ -7,33 +7,26 @@ export interface NarrationEntry {
   isHint: boolean;
 }
 
+export interface NarrationOptions {
+  timestamp?: string;
+  isHint?: boolean;
+}
+
 let nextId = 0;
 
-const narrationState = reactive({
+export const narrationState = reactive({
   entries: [] as NarrationEntry[],
-  version: 0,  // bumped on every mutation to trigger watchers
 });
 
-export function appendNarration(text: string, timestamp?: string): void {
+export function appendNarration(text: string, options?: NarrationOptions): void {
   narrationState.entries.push({
     id: nextId++,
     text,
-    timestamp,
-    isHint: timestamp === '  >>',
+    timestamp: options?.timestamp,
+    isHint: options?.isHint ?? false,
   });
-  narrationState.version++;
 }
 
 export function clearNarration(): void {
   narrationState.entries.length = 0;
-  narrationState.version++;
-}
-
-export function useNarration() {
-  return {
-    entries: narrationState.entries,
-    version: narrationState,
-    appendNarration,
-    clearNarration,
-  };
 }

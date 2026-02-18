@@ -1,11 +1,11 @@
-import { getState, notify } from './state';
+import { getAgcState } from '../stores/agc';
 import { executeVerb, stopMonitor } from './verbs';
 import { triggerOprErr } from '../dsky/opr-err';
 import { getCodeBlockForCommand } from './verb-code-map';
 import { showCodeBlock, clearCodeViewer } from '../composables/useCodeAnimation';
 
 export function dispatch(): boolean {
-  const state = getState();
+  const state = getAgcState();
   const verb = state.verb;
   const noun = state.noun;
 
@@ -37,7 +37,6 @@ export function dispatch(): boolean {
     state.verbNounFlash = false;
   }
 
-  notify('display');
 
   if (!state.scenarioActive) {
     const codeBlock = getCodeBlockForCommand(verb, state.noun);
@@ -51,7 +50,7 @@ export function dispatch(): boolean {
 }
 
 export function completeProgramChange(programNumber: number): void {
-  const state = getState();
+  const state = getAgcState();
   stopMonitor();
   state.program = programNumber;
   state.verb = null;
@@ -60,7 +59,6 @@ export function completeProgramChange(programNumber: number): void {
   state.inputMode = 'idle';
   state.inputBuffer = '';
   state.inputTarget = null;
-  notify('display');
 
   if (!state.scenarioActive) {
     const codeBlock = getCodeBlockForCommand(37, null);
@@ -72,7 +70,7 @@ export function completeProgramChange(programNumber: number): void {
 }
 
 export function completeDataLoad(reg: 'r1' | 'r2' | 'r3', sign: '+' | '-', digits: string): void {
-  const state = getState();
+  const state = getAgcState();
   state[reg] = {
     sign,
     digits: digits.padStart(5, '0').split('').map(Number),
@@ -93,5 +91,4 @@ export function completeDataLoad(reg: 'r1' | 'r2' | 'r3', sign: '+' | '-', digit
     state.inputBuffer = '';
   }
 
-  notify('display');
 }

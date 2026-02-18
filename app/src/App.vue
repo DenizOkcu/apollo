@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useKeyboard } from './composables/useKeyboard';
 import { useMobile } from './composables/useMobile';
-import { useCodeAnimation } from './composables/useCodeAnimation';
+import { codeState } from './composables/useCodeAnimation';
 import { startClock } from './core/clock';
 import { runScenario } from './scenarios/scenario-runner';
 import type { Scenario } from './scenarios/scenario-runner';
@@ -31,7 +31,6 @@ const SCENARIOS: Record<string, Scenario> = {
 const showPicker = ref(true);
 const showExplorer = ref(false);
 
-const { codeState } = useCodeAnimation();
 
 useKeyboard();
 useMobile();

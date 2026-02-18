@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted } from 'vue';
-import { bindPhysicalKeyboard } from '../dsky/keyboard';
+import { bindPhysicalKeyboard, unbindPhysicalKeyboard } from '../dsky/keyboard';
 
 let bound = false;
 
@@ -12,6 +12,9 @@ export function useKeyboard(): void {
   });
 
   onUnmounted(() => {
-    // Keep keyboard bound — singleton
+    if (bound) {
+      unbindPhysicalKeyboard();
+      bound = false;
+    }
   });
 }

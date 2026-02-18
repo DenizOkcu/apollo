@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useMobile } from '../composables/useMobile';
+import { parseLine } from '../core/agc-source';
+import type { AGCSourceLine } from '../core/agc-source';
 
 interface AGCModule {
   name: string;
@@ -26,39 +28,41 @@ const index = ref<AGCIndex | null>(null);
 const activeModule = ref('');
 const activeFile = ref('');
 const headerTitle = ref('AGC EXPLORER');
-const sourceLines = ref<{ raw: string; isComment: boolean; isLabel: boolean; isHighlight: boolean }[]>([]);
+const sourceLines = ref<AGCSourceLine[]>([]);
 const loading = ref(false);
+const loadError = ref<string | null>(null);
 const sidebarOpen = ref(false);
 const hidden = ref(false);
 
 const fileCache = new Map<string, string>();
 
-function parseLine(raw: string) {
-  const trimmed = raw.trimStart();
-  const isComment = trimmed.startsWith('#');
-  const isLabel = !isComment && /^[A-Z0-9_]+\s/.test(trimmed) && !trimmed.startsWith(' ');
-  const isHighlight = isComment && (
-    /BURN.BABY|FLAGORGY|POODOO|CURTAINS|WHIMPER|BAILOUT|CRANK.*SILLY|OFF TO SEE|WIZARD|MAGNIFICENT|ASTRONAUT|HELLO|GOODBYE|TEMPORARY.*HOPE|NOLI SE TANGERE|HONI SOIT|ENEMA|POOH|GUILDENSTERN|PINBALL/i.test(raw) ||
-    /WE CAME|NOT NEEDED|PILOT|HERO|FAMOUS|HAMILTON|PRIDE|THE FOLLOWING|THIS ROUTINE|IMPORTANT|NOTE WELL|HISTORY/i.test(raw)
-  );
-  return { raw, isComment, isLabel, isHighlight };
-}
-
 async function fetchIndex(): Promise<AGCIndex> {
   if (index.value) return index.value;
-  const res = await fetch(`${import.meta.env.BASE_URL}agc/agc-index.json`);
-  index.value = (await res.json()) as AGCIndex;
-  return index.value;
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}agc/agc-index.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    index.value = (await res.json()) as AGCIndex;
+    return index.value;
+  } catch (e) {
+    loadError.value = 'Failed to load AGC source index';
+    throw e;
+  }
 }
 
 async function fetchSource(moduleName: string, fileName: string): Promise<string> {
   const key = `${moduleName}/${fileName}`;
   const cached = fileCache.get(key);
   if (cached !== undefined) return cached;
-  const res = await fetch(`${import.meta.env.BASE_URL}agc/${key}`);
-  const text = await res.text();
-  fileCache.set(key, text);
-  return text;
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}agc/${key}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    fileCache.set(key, text);
+    return text;
+  } catch (e) {
+    loadError.value = `Failed to load ${fileName}`;
+    throw e;
+  }
 }
 
 async function navigateTo(moduleName: string, fileName: string): Promise<void> {
@@ -66,10 +70,15 @@ async function navigateTo(moduleName: string, fileName: string): Promise<void> {
   activeFile.value = fileName;
   headerTitle.value = `AGC EXPLORER — ${moduleName} / ${fileName}`;
   loading.value = true;
+  loadError.value = null;
 
-  const text = await fetchSource(moduleName, fileName);
-  if (activeModule.value === moduleName && activeFile.value === fileName) {
-    sourceLines.value = text.split('\n').map(parseLine);
+  try {
+    const text = await fetchSource(moduleName, fileName);
+    if (activeModule.value === moduleName && activeFile.value === fileName) {
+      sourceLines.value = text.split('\n').map(line => parseLine(line, fileName));
+      loading.value = false;
+    }
+  } catch {
     loading.value = false;
   }
 }
@@ -81,14 +90,13 @@ function selectFile(moduleName: string, fileName: string): void {
   }
 }
 
-// Collapsed modules
-const collapsedModules = ref<Set<string>>(new Set());
+const collapsedModules = reactive(new Set<string>());
 
 function toggleModule(name: string): void {
-  if (collapsedModules.value.has(name)) {
-    collapsedModules.value.delete(name);
+  if (collapsedModules.has(name)) {
+    collapsedModules.delete(name);
   } else {
-    collapsedModules.value.add(name);
+    collapsedModules.add(name);
   }
 }
 
@@ -104,21 +112,25 @@ function onKeyDown(e: KeyboardEvent): void {
 onMounted(async () => {
   document.addEventListener('keydown', onKeyDown);
 
-  const agcIndex = await fetchIndex();
-  let startModule = agcIndex.modules[0]?.name ?? '';
-  let startFile = agcIndex.modules[0]?.files[0] ?? '';
+  try {
+    const agcIndex = await fetchIndex();
+    let startModule = agcIndex.modules[0]?.name ?? '';
+    let startFile = agcIndex.modules[0]?.files[0] ?? '';
 
-  if (props.initialFile) {
-    for (const mod of agcIndex.modules) {
-      if (mod.files.includes(props.initialFile)) {
-        startModule = mod.name;
-        startFile = props.initialFile;
-        break;
+    if (props.initialFile) {
+      for (const mod of agcIndex.modules) {
+        if (mod.files.includes(props.initialFile)) {
+          startModule = mod.name;
+          startFile = props.initialFile;
+          break;
+        }
       }
     }
-  }
 
-  void navigateTo(startModule, startFile);
+    void navigateTo(startModule, startFile);
+  } catch {
+    // Error already stored in loadError
+  }
 });
 
 onUnmounted(() => {
@@ -161,7 +173,8 @@ onUnmounted(() => {
       />
 
       <div class="explorer-source">
-        <div v-if="loading" class="explorer-source-loading">LOADING...</div>
+        <div v-if="loadError" class="explorer-source-loading">{{ loadError }}</div>
+        <div v-else-if="loading" class="explorer-source-loading">LOADING...</div>
         <template v-else>
           <div
             v-for="(line, i) in sourceLines"
@@ -172,12 +185,12 @@ onUnmounted(() => {
                 'code-highlight': line.isHighlight,
                 'code-comment': !line.isHighlight && line.isComment,
                 'code-label': !line.isHighlight && !line.isComment && line.isLabel,
-                'code-blank': !line.isHighlight && !line.isComment && !line.isLabel && line.raw.trim() === '',
+                'code-blank': !line.isHighlight && !line.isComment && !line.isLabel && line.text.trim() === '',
               }
             ]"
           >
             <span class="code-linenum">{{ i + 1 }}</span>
-            <span class="code-text">{{ line.raw }}</span>
+            <span class="code-text">{{ line.text }}</span>
           </div>
         </template>
       </div>

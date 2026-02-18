@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const MOBILE_QUERY = '(max-width: 768px)';
 
@@ -39,10 +39,6 @@ export function closeCodePanel(): void {
 export function useMobile() {
   onMounted(() => {
     initMobile();
-  });
-
-  onUnmounted(() => {
-    // Keep listener alive — singleton
   });
 
   return {

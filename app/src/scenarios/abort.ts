@@ -1,4 +1,4 @@
-import { getState, notify } from '../core/state';
+import { getAgcState } from '../stores/agc';
 import { startTelemetry, stopTelemetry } from './scenario-runner';
 import type { Scenario } from './scenario-runner';
 import { triggerAlarm, displayAlarms, clearAlarms } from '../core/alarm';
@@ -8,7 +8,7 @@ import {
 } from '../core/agc-source';
 
 function updateDisplayFromNav(): void {
-  const state = getState();
+  const state = getAgcState();
   const noun = state.noun;
   if (noun === null) return;
   const def = getNounDef(noun);
@@ -23,7 +23,6 @@ function updateDisplayFromNav(): void {
       state[regs[i]] = { sign: formatted.sign, digits: formatted.digits };
     }
   }
-  notify('display');
 }
 
 export const abortScenario: Scenario = {
@@ -162,13 +161,12 @@ export const abortScenario: Scenario = {
       delay: 0,
       action: 'callback',
       callback: () => {
-        const state = getState();
+        const state = getAgcState();
         clearAlarms();
         state.lights.restart = false;
         state.lights.prog = false;
         state.lights.oprErr = false;
-        notify('display');
-      },
+            },
     },
     {
       delay: 500,

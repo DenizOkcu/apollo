@@ -1,16 +1,16 @@
-import { getState, notify } from './state';
+import { getAgcState } from '../stores/agc';
 
 let clockTimer: ReturnType<typeof setInterval> | null = null;
 
 export function startClock(): void {
   if (clockTimer) return;
   clockTimer = setInterval(() => {
-    const state = getState();
+    const state = getAgcState();
     if (state.clockRunning) {
-      state.missionElapsedTime += 1;  // 1 centisecond per 10ms
-      // Don't notify every tick — display will poll on monitor interval
+      // 100ms = 1 centisecond (real-time)
+      state.missionElapsedTime += 1;
     }
-  }, 10);
+  }, 100);
 }
 
 export function stopClock(): void {
@@ -21,13 +21,12 @@ export function stopClock(): void {
 }
 
 export function setMET(centiseconds: number): void {
-  const state = getState();
+  const state = getAgcState();
   state.missionElapsedTime = centiseconds;
-  notify('clock');
 }
 
 export function getMETComponents(): { hours: number; minutes: number; seconds: number; centiseconds: number } {
-  const state = getState();
+  const state = getAgcState();
   const total = Math.floor(state.missionElapsedTime);
   const cs = total % 100;
   const totalSeconds = Math.floor(total / 100);

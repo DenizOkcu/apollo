@@ -57,6 +57,12 @@ export interface AGCState {
   inputTarget: InputTarget;
   dataLoadQueue: ('r1' | 'r2' | 'r3')[];
 
+  // Keyboard input buffers (moved from module scope in keyboard.ts)
+  verbBuffer: string;
+  nounBuffer: string;
+  dataBuffer: string;
+  dataSign: '+' | '-';
+
   missionElapsedTime: number;  // centiseconds
   clockRunning: boolean;
 
@@ -72,11 +78,11 @@ export interface AGCState {
   scenarioActive: boolean;
 }
 
-function blankRegister(): RegisterValue {
+export function blankRegister(): RegisterValue {
   return { sign: null, digits: [null, null, null, null, null] };
 }
 
-function defaultLights(): DSKYLights {
+export function defaultLights(): DSKYLights {
   return {
     compActy: false,
     uplinkActy: false,
@@ -129,6 +135,12 @@ function createInitialState(): AGCState {
     inputTarget: null,
     dataLoadQueue: [],
 
+    // Keyboard input buffers
+    verbBuffer: '',
+    nounBuffer: '',
+    dataBuffer: '',
+    dataSign: '+',
+
     missionElapsedTime: 36900000,  // ~102:30:00 GET (landing time)
     clockRunning: true,
 
@@ -160,6 +172,13 @@ export const useAgcStore = defineStore('agc', () => {
   ): void {
     if (format === 'blank') {
       state[reg] = blankRegister();
+    } else if (format === 'octal') {
+      const absVal = Math.abs(Math.round(value));
+      const str = absVal.toString(8).padStart(5, '0').slice(-5);
+      state[reg] = {
+        sign: null,  // Octal display has no sign
+        digits: str.split('').map(Number),
+      };
     } else {
       const absVal = Math.abs(Math.round(value));
       const str = absVal.toString().padStart(5, '0').slice(-5);
@@ -176,3 +195,20 @@ export const useAgcStore = defineStore('agc', () => {
 
   return { state, resetState, setRegister, blankReg };
 });
+
+// Lazy singleton accessor for use in non-Vue modules (core/, scenarios/, dsky/).
+// Safe to call after Pinia is installed (i.e. after main.ts runs createPinia()).
+let _store: ReturnType<typeof useAgcStore> | null = null;
+
+function resolveStore() {
+  if (!_store) _store = useAgcStore();
+  return _store;
+}
+
+export function getAgcState(): AGCState {
+  return resolveStore().state;
+}
+
+export function getAgcStore() {
+  return resolveStore();
+}

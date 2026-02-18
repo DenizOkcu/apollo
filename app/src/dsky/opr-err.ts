@@ -1,4 +1,4 @@
-import { getState, notify } from '../core/state';
+import { getAgcState } from '../stores/agc';
 import { appendNarration } from '../composables/useNarration';
 
 const hintMessages: Record<string, string> = {
@@ -12,9 +12,8 @@ const hintMessages: Record<string, string> = {
 let lastHintTime = 0;
 
 export function triggerOprErr(context: string): void {
-  const state = getState();
+  const state = getAgcState();
   state.lights.oprErr = true;
-  notify('display');
 
   // In free-play mode, show a contextual hint (debounced to max one per 2s)
   if (!state.scenarioActive) {

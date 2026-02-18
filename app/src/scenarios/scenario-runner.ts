@@ -1,4 +1,5 @@
-import { getState, notify } from '../core/state';
+import { getAgcState, defaultLights } from '../stores/agc';
+import type { AGCState, NavState, DSKYLights } from '../stores/agc';
 import { appendNarration, clearNarration } from '../composables/useNarration';
 import { showCodeBlock, clearCodeViewer, addCodeSeparator } from '../composables/useCodeAnimation';
 import { setKeyListener, pressKey } from '../dsky/keyboard';
@@ -6,14 +7,20 @@ import type { DSKYKey } from '../dsky/keyboard';
 import type { AGCCodeBlock } from '../core/agc-source';
 import { clearAlarms } from '../core/alarm';
 
+type ScenarioStateChange = Partial<Pick<AGCState,
+  'verb' | 'noun' | 'program' | 'inputMode' | 'inputBuffer' | 'inputTarget' |
+  'missionElapsedTime' | 'clockRunning' | 'verbNounFlash' | 'scenarioActive' |
+  'monitorActive' | 'monitorVerb' | 'monitorNoun'
+>>;
+
 export interface ScenarioStep {
-  delay: number;  // ms to wait AFTER the previous step completes before executing this one
+  delay: number;
   action: 'narrate' | 'setState' | 'waitForKey' | 'setNav' | 'setLights' | 'callback' | 'showCode';
   text?: string;
   timestamp?: string;
-  stateChanges?: Record<string, unknown>;
-  navChanges?: Record<string, unknown>;
-  lightChanges?: Record<string, unknown>;
+  stateChanges?: ScenarioStateChange;
+  navChanges?: Partial<NavState>;
+  lightChanges?: Partial<DSKYLights>;
   key?: DSKYKey;
   keyHint?: string;
   callback?: () => void;
@@ -77,28 +84,22 @@ export function runScenario(scenario: Scenario): void {
   clearNarration();
   clearCodeViewer();
 
-  const state = getState();
+  const state = getAgcState();
 
   // Reset display state
   clearAlarms();
-  state.lights.compActy = false;
-  state.lights.uplinkActy = false;
-  state.lights.noAtt = false;
-  state.lights.stby = false;
-  state.lights.keyRel = false;
-  state.lights.oprErr = false;
-  state.lights.temp = false;
-  state.lights.gimbalLock = false;
-  state.lights.prog = false;
-  state.lights.restart = false;
-  state.lights.tracker = false;
-  state.lights.alt = false;
-  state.lights.vel = false;
+  Object.assign(state.lights, defaultLights());
   state.verbNounFlash = false;
   state.inputMode = 'idle';
   state.inputBuffer = '';
   state.inputTarget = null;
   state.dataLoadQueue = [];
+
+  // Reset keyboard buffers
+  state.verbBuffer = '';
+  state.nounBuffer = '';
+  state.dataBuffer = '';
+  state.dataSign = '+';
   if (state.monitorInterval) {
     clearInterval(state.monitorInterval);
     state.monitorInterval = null;
@@ -106,7 +107,6 @@ export function runScenario(scenario: Scenario): void {
   state.monitorActive = false;
   state.monitorVerb = null;
   state.monitorNoun = null;
-  notify('display');
 
   currentScenario = scenario;
   currentStepIndex = 0;
@@ -122,7 +122,7 @@ export function runScenario(scenario: Scenario): void {
     } else if (waitingForKey) {
       if (!nudgeShown) {
         nudgeShown = true;
-        appendNarration(getNudgeMessage(waitingForKey, key));
+        appendNarration(getNudgeMessage(waitingForKey, key), { isHint: true });
       }
       clearAutoRecovery();
       const expectedKey = waitingForKey;
@@ -156,7 +156,7 @@ export function stopScenario(): void {
     telemetryInterval = null;
   }
 
-  const state = getState();
+  const state = getAgcState();
   state.scenarioActive = false;
   setKeyListener(null);
 }
@@ -165,7 +165,7 @@ function scheduleNextStep(): void {
   if (cancelled || !currentScenario) return;
   if (currentStepIndex >= currentScenario.steps.length) {
     if (currentScenario.onComplete) currentScenario.onComplete();
-    const state = getState();
+    const state = getAgcState();
     state.scenarioActive = false;
     setKeyListener(null);
     return;
@@ -191,12 +191,12 @@ function executeCurrentStep(): void {
   if (currentStepIndex >= currentScenario.steps.length) return;
 
   const step = currentScenario.steps[currentStepIndex];
-  const state = getState();
+  const state = getAgcState();
 
   switch (step.action) {
     case 'narrate':
       if (step.text) {
-        appendNarration(step.text, step.timestamp);
+        appendNarration(step.text, { timestamp: step.timestamp });
       }
       advanceToNextStep();
       break;
@@ -204,7 +204,7 @@ function executeCurrentStep(): void {
     case 'setState':
       if (step.stateChanges) {
         Object.assign(state, step.stateChanges);
-        notify('display');
+    
       }
       advanceToNextStep();
       break;
@@ -212,7 +212,7 @@ function executeCurrentStep(): void {
     case 'setNav':
       if (step.navChanges) {
         Object.assign(state.nav, step.navChanges);
-        notify('display');
+    
       }
       advanceToNextStep();
       break;
@@ -220,7 +220,7 @@ function executeCurrentStep(): void {
     case 'setLights':
       if (step.lightChanges) {
         Object.assign(state.lights, step.lightChanges);
-        notify('display');
+    
       }
       advanceToNextStep();
       break;
@@ -243,7 +243,7 @@ function executeCurrentStep(): void {
       clearAutoRecovery();
       waitingForKey = step.key || null;
       if (step.keyHint) {
-        appendNarration(step.keyHint, '  >>');
+        appendNarration(step.keyHint, { isHint: true });
       }
       break;
   }
@@ -257,34 +257,34 @@ function advanceToNextStep(): void {
 // Helper: start a telemetry animation that interpolates nav values over time
 export function startTelemetry(
   duration: number,
-  from: Record<string, number>,
-  to: Record<string, number>,
+  from: Partial<NavState>,
+  to: Partial<NavState>,
   onTick?: () => void
 ): void {
   if (telemetryInterval) clearInterval(telemetryInterval);
 
-  const state = getState();
+  const state = getAgcState();
   const startTime = Date.now();
+  const keys = Object.keys(to) as (keyof NavState)[];
   const startValues: Record<string, number> = {};
   const endValues: Record<string, number> = {};
 
-  for (const key of Object.keys(to)) {
-    startValues[key] = (from[key] ?? (state.nav as Record<string, number>)[key]) as number;
+  for (const key of keys) {
+    startValues[key] = from[key] ?? state.nav[key];
     endValues[key] = to[key]!;
   }
 
   telemetryInterval = setInterval(() => {
-    const s = getState();
+    const s = getAgcState();
     const elapsed = Date.now() - startTime;
     const t = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - t, 2);
 
-    for (const key of Object.keys(endValues)) {
-      (s.nav as Record<string, number>)[key] = startValues[key] + (endValues[key] - startValues[key]) * eased;
+    for (const key of keys) {
+      s.nav[key] = startValues[key] + (endValues[key] - startValues[key]) * eased;
     }
 
     if (s.monitorActive || onTick) {
-      notify('display');
       if (onTick) onTick();
     }
 

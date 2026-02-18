@@ -1,4 +1,4 @@
-import { getState, notify, blankReg } from './state';
+import { getAgcState, getAgcStore } from '../stores/agc';
 import { getNounDef, formatNounValue } from './nouns';
 import { displayAlarms, clearAlarms } from './alarm';
 
@@ -8,7 +8,7 @@ export interface VerbResult {
 }
 
 function applyNounToRegisters(verb: number): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   const noun = state.noun;
   if (noun === null) return { ok: false, error: 'No noun' };
 
@@ -39,17 +39,17 @@ function applyNounToRegisters(verb: number): VerbResult {
         digits: formatted.digits,
       };
     } else {
-      blankReg(regs[i]);
+      getAgcStore().blankReg(regs[i]);
     }
   }
 
-  notify('display');
+
   return { ok: true };
 }
 
 function startMonitor(): void {
   stopMonitor();
-  const state = getState();
+  const state = getAgcState();
   state.monitorActive = true;
   state.monitorVerb = state.verb;
   state.monitorNoun = state.noun;
@@ -59,7 +59,7 @@ function startMonitor(): void {
 
   // Then every second
   state.monitorInterval = setInterval(() => {
-    const s = getState();
+    const s = getAgcState();
     if (s.monitorActive && s.monitorVerb !== null && s.monitorNoun !== null) {
       const savedNoun = s.noun;
       s.noun = s.monitorNoun;
@@ -70,7 +70,7 @@ function startMonitor(): void {
 }
 
 export function stopMonitor(): void {
-  const state = getState();
+  const state = getAgcState();
   state.monitorActive = false;
   if (state.monitorInterval) {
     clearInterval(state.monitorInterval);
@@ -79,7 +79,7 @@ export function stopMonitor(): void {
 }
 
 function startDataLoad(): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   const noun = state.noun;
   if (noun === null) return { ok: false, error: 'No noun' };
 
@@ -103,12 +103,12 @@ function startDataLoad(): VerbResult {
   state.inputMode = 'awaitingData';
   state.inputTarget = queue[0] || null;
   state.inputBuffer = '';
-  notify('display');
+
   return { ok: true };
 }
 
 function lampTest(): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   // Turn on all lights
   const lightKeys = Object.keys(state.lights) as (keyof typeof state.lights)[];
   for (const key of lightKeys) {
@@ -127,11 +127,11 @@ function lampTest(): VerbResult {
   state.program = 88;
   state.verbNounFlash = false;
 
-  notify('display');
+
 
   // Restore after 5 seconds
   setTimeout(() => {
-    const s = getState();
+    const s = getAgcState();
     const keys2 = Object.keys(s.lights) as (keyof typeof s.lights)[];
     for (const key of keys2) {
       s.lights[key] = false;
@@ -139,24 +139,24 @@ function lampTest(): VerbResult {
     s.verb = null;
     s.noun = null;
     s.program = s.program === 88 ? null : s.program;
-    blankReg('r1');
-    blankReg('r2');
-    blankReg('r3');
-    notify('display');
+    getAgcStore().blankReg('r1');
+    getAgcStore().blankReg('r2');
+    getAgcStore().blankReg('r3');
+  
   }, 5000);
 
   return { ok: true };
 }
 
 function freshStart(): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   stopMonitor();
   state.verb = null;
   state.noun = null;
   state.program = 0;
-  blankReg('r1');
-  blankReg('r2');
-  blankReg('r3');
+  getAgcStore().blankReg('r1');
+  getAgcStore().blankReg('r2');
+  getAgcStore().blankReg('r3');
   state.verbNounFlash = false;
   state.inputMode = 'idle';
   state.inputBuffer = '';
@@ -169,23 +169,23 @@ function freshStart(): VerbResult {
   }
 
   clearAlarms();
-  notify('display');
+
   return { ok: true };
 }
 
 function changeProgram(): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   // V37: expect next input to be a 2-digit program number
   state.verbNounFlash = true;
   state.inputMode = 'awaitingNoun';  // reuse noun input for program number
   state.inputTarget = 'noun';
   state.inputBuffer = '';
-  notify('display');
+
   return { ok: true };
 }
 
 export function executeVerb(verb: number, noun: number | null): VerbResult {
-  const state = getState();
+  const state = getAgcState();
   state.verb = verb;
   if (noun !== null) state.noun = noun;
 
@@ -211,14 +211,14 @@ export function executeVerb(verb: number, noun: number | null): VerbResult {
     case 33: // Proceed
       state.verbNounFlash = false;
       state.inputMode = 'idle';
-      notify('display');
+    
       return { ok: true };
 
     case 34: // Terminate
       stopMonitor();
       state.verbNounFlash = false;
       state.inputMode = 'idle';
-      notify('display');
+    
       return { ok: true };
 
     case 35: // Lamp test

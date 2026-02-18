@@ -1,4 +1,4 @@
-import { getState, notify, blankReg } from '../core/state';
+import { getAgcState, getAgcStore } from '../stores/agc';
 import { dispatch, completeProgramChange, completeDataLoad } from '../core/cpu';
 import { clearAlarms } from '../core/alarm';
 import { triggerOprErr } from './opr-err';
@@ -15,14 +15,8 @@ export function setKeyListener(cb: KeyCallback | null): void {
   externalKeyListener = cb;
 }
 
-// Verb digit accumulation
-let verbBuffer = '';
-let nounBuffer = '';
-let dataSign: '+' | '-' = '+';
-let dataBuffer = '';
-
 export function pressKey(key: DSKYKey): void {
-  const state = getState();
+  const state = getAgcState();
 
   // Notify external listeners (for scenarios)
   if (externalKeyListener) {
@@ -31,11 +25,10 @@ export function pressKey(key: DSKYKey): void {
 
   // Flash comp acty briefly
   state.lights.compActy = true;
-  notify('display');
+
   setTimeout(() => {
-    const s = getState();
+    const s = getAgcState();
     s.lights.compActy = false;
-    notify('display');
   }, 150);
 
   switch (key) {
@@ -74,65 +67,60 @@ export function pressKey(key: DSKYKey): void {
 }
 
 function handleVerb(): void {
-  const state = getState();
+  const state = getAgcState();
   state.inputMode = 'awaitingVerb';
   state.inputTarget = 'verb';
-  verbBuffer = '';
+  state.verbBuffer = '';
   state.verb = null;
-  notify('display');
 }
 
 function handleNoun(): void {
-  const state = getState();
+  const state = getAgcState();
   state.inputMode = 'awaitingNoun';
   state.inputTarget = 'noun';
-  nounBuffer = '';
+  state.nounBuffer = '';
   state.noun = null;
-  notify('display');
 }
 
 function handleDigit(digit: string): void {
-  const state = getState();
+  const state = getAgcState();
 
   if (state.inputMode === 'awaitingVerb') {
-    verbBuffer += digit;
-    if (verbBuffer.length === 1) {
+    state.verbBuffer += digit;
+    if (state.verbBuffer.length === 1) {
       state.verb = parseInt(digit, 10) * 10;
     }
-    if (verbBuffer.length >= 2) {
-      state.verb = parseInt(verbBuffer.slice(0, 2), 10);
+    if (state.verbBuffer.length >= 2) {
+      state.verb = parseInt(state.verbBuffer.slice(0, 2), 10);
       state.inputMode = 'idle';
       state.inputTarget = null;
     }
-    notify('display');
     return;
   }
 
   if (state.inputMode === 'awaitingNoun') {
-    nounBuffer += digit;
-    if (nounBuffer.length === 1) {
+    state.nounBuffer += digit;
+    if (state.nounBuffer.length === 1) {
       state.noun = parseInt(digit, 10) * 10;
     }
-    if (nounBuffer.length >= 2) {
-      state.noun = parseInt(nounBuffer.slice(0, 2), 10);
+    if (state.nounBuffer.length >= 2) {
+      state.noun = parseInt(state.nounBuffer.slice(0, 2), 10);
       state.inputMode = 'idle';
       state.inputTarget = null;
     }
-    notify('display');
     return;
   }
 
   if (state.inputMode === 'awaitingData') {
-    if (dataBuffer.length < 5) {
-      dataBuffer += digit;
+    if (state.dataBuffer.length < 5) {
+      state.dataBuffer += digit;
       const reg = state.inputTarget as 'r1' | 'r2' | 'r3';
       if (reg) {
-        const padded = dataBuffer.padEnd(5, ' ');
+        const padded = state.dataBuffer.padEnd(5, ' ');
         state[reg] = {
-          sign: dataSign,
+          sign: state.dataSign,
           digits: padded.split('').map(c => c === ' ' ? null : parseInt(c, 10)),
         };
-        notify('display');
       }
     }
     return;
@@ -143,18 +131,17 @@ function handleDigit(digit: string): void {
 }
 
 function handleSign(sign: '+' | '-'): void {
-  const state = getState();
+  const state = getAgcState();
 
   if (state.inputMode === 'awaitingData') {
-    dataSign = sign;
-    dataBuffer = '';
+    state.dataSign = sign;
+    state.dataBuffer = '';
     const reg = state.inputTarget as 'r1' | 'r2' | 'r3';
     if (reg) {
       state[reg] = {
         sign,
         digits: [null, null, null, null, null],
       };
-      notify('display');
     }
     return;
   }
@@ -163,21 +150,20 @@ function handleSign(sign: '+' | '-'): void {
 }
 
 function handleEnter(): void {
-  const state = getState();
+  const state = getAgcState();
 
   if (state.inputMode === 'awaitingVerb') {
-    if (verbBuffer.length > 0) {
-      state.verb = parseInt(verbBuffer.padEnd(2, '0'), 10);
+    if (state.verbBuffer.length > 0) {
+      state.verb = parseInt(state.verbBuffer.padEnd(2, '0'), 10);
     }
     state.inputMode = 'idle';
     state.inputTarget = null;
-    notify('display');
     return;
   }
 
   if (state.inputMode === 'awaitingNoun') {
-    if (nounBuffer.length > 0) {
-      const num = parseInt(nounBuffer.padEnd(2, '0'), 10);
+    if (state.nounBuffer.length > 0) {
+      const num = parseInt(state.nounBuffer.padEnd(2, '0'), 10);
       if (state.verb === 37) {
         completeProgramChange(num);
         return;
@@ -194,12 +180,12 @@ function handleEnter(): void {
   }
 
   if (state.inputMode === 'awaitingData') {
-    if (dataBuffer.length === 5) {
+    if (state.dataBuffer.length === 5) {
       const reg = state.inputTarget as 'r1' | 'r2' | 'r3';
       if (reg) {
-        completeDataLoad(reg, dataSign, dataBuffer);
-        dataSign = '+';
-        dataBuffer = '';
+        completeDataLoad(reg, state.dataSign, state.dataBuffer);
+        state.dataSign = '+';
+        state.dataBuffer = '';
       }
     } else {
       triggerOprErr('enter-no-data');
@@ -216,59 +202,53 @@ function handleEnter(): void {
 }
 
 function handleClear(): void {
-  const state = getState();
+  const state = getAgcState();
 
   if (state.inputMode === 'awaitingVerb') {
-    verbBuffer = '';
+    state.verbBuffer = '';
     state.verb = null;
-    notify('display');
     return;
   }
   if (state.inputMode === 'awaitingNoun') {
-    nounBuffer = '';
+    state.nounBuffer = '';
     state.noun = null;
-    notify('display');
     return;
   }
   if (state.inputMode === 'awaitingData') {
-    dataBuffer = '';
+    state.dataBuffer = '';
     const reg = state.inputTarget as 'r1' | 'r2' | 'r3';
     if (reg) {
       state[reg] = {
-        sign: dataSign,
+        sign: state.dataSign,
         digits: [null, null, null, null, null],
       };
-      notify('display');
     }
     return;
   }
-  blankReg('r1');
-  blankReg('r2');
-  blankReg('r3');
-  notify('display');
+  const store = getAgcStore();
+  store.blankReg('r1');
+  store.blankReg('r2');
+  store.blankReg('r3');
 }
 
 function handleProceed(): void {
-  const state = getState();
+  const state = getAgcState();
   state.verbNounFlash = false;
   state.inputMode = 'idle';
   state.inputTarget = null;
   state.dataLoadQueue = [];
-  notify('display');
 }
 
 function handleKeyRelease(): void {
-  const state = getState();
+  const state = getAgcState();
   state.lights.keyRel = false;
-  notify('display');
 }
 
 function handleReset(): void {
-  const state = getState();
+  const state = getAgcState();
   state.lights.oprErr = false;
   state.lights.prog = false;
   clearAlarms();
-  notify('display');
 }
 
 // Map physical keyboard to DSKY keys
@@ -285,12 +265,29 @@ const KEY_MAP: Record<string, DSKYKey> = {
   '-': 'MINUS',
 };
 
-export function bindPhysicalKeyboard(): void {
-  document.addEventListener('keydown', (e) => {
+let keyboardCleanup: (() => void) | null = null;
+
+export function bindPhysicalKeyboard(): () => void {
+  const handler = (e: KeyboardEvent) => {
     const mapped = KEY_MAP[e.key];
     if (mapped) {
       e.preventDefault();
       pressKey(mapped);
     }
-  });
+  };
+
+  document.addEventListener('keydown', handler);
+
+  keyboardCleanup = () => {
+    document.removeEventListener('keydown', handler);
+    keyboardCleanup = null;
+  };
+
+  return keyboardCleanup;
+}
+
+export function unbindPhysicalKeyboard(): void {
+  if (keyboardCleanup) {
+    keyboardCleanup();
+  }
 }

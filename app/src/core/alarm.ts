@@ -1,7 +1,7 @@
-import { getState, notify } from './state';
+import { getAgcState, getAgcStore } from '../stores/agc';
 
 export function triggerAlarm(code: number): void {
-  const state = getState();
+  const state = getAgcState();
   // Store in first available failreg slot
   if (state.failreg[0] === 0) {
     state.failreg[0] = code;
@@ -13,40 +13,26 @@ export function triggerAlarm(code: number): void {
   }
 
   state.lights.prog = true;
-  notify('alarm');
 }
 
 export function displayAlarms(): void {
-  const state = getState();
+  const state = getAgcState();
+  const store = getAgcStore();
+
   state.verb = 5;
   state.noun = 9;
   state.verbNounFlash = true;
 
-  // Display alarm codes in octal
-  const f0 = state.failreg[0];
-  const f1 = state.failreg[1];
-  const f2 = state.failreg[2];
-
-  setOctalRegister('r1', f0);
-  setOctalRegister('r2', f1);
-  setOctalRegister('r3', f2);
-  notify('display');
-}
-
-function setOctalRegister(reg: 'r1' | 'r2' | 'r3', value: number): void {
-  const state = getState();
-  const str = value.toString(8).padStart(5, '0').slice(-5);
-  state[reg] = {
-    sign: null,
-    digits: str.split('').map(Number),
-  };
+  // Display alarm codes in octal using store's setRegister
+  store.setRegister('r1', null, state.failreg[0], 'octal');
+  store.setRegister('r2', null, state.failreg[1], 'octal');
+  store.setRegister('r3', null, state.failreg[2], 'octal');
 }
 
 export function clearAlarms(): void {
-  const state = getState();
+  const state = getAgcState();
   state.failreg = [0, 0, 0];
   state.lights.prog = false;
-  notify('alarm');
 }
 
 export const ALARM_DESCRIPTIONS: Record<number, string> = {

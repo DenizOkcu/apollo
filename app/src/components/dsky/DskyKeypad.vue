@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { pressKey } from '../../dsky/keyboard';
 import type { DSKYKey } from '../../dsky/keyboard';
 
@@ -42,26 +43,16 @@ const rows: KeyDef[][] = [
   ],
 ];
 
-function onMouseDown(e: MouseEvent, keyDef: KeyDef): void {
+const pressedKey = ref<string | null>(null);
+
+function onPress(e: Event, keyDef: KeyDef): void {
   e.preventDefault();
-  const btn = e.currentTarget as HTMLElement;
-  btn.classList.add('pressed');
+  pressedKey.value = keyDef.key;
   pressKey(keyDef.key);
 }
 
-function onMouseUp(e: Event): void {
-  (e.currentTarget as HTMLElement).classList.remove('pressed');
-}
-
-function onTouchStart(e: TouchEvent, keyDef: KeyDef): void {
-  e.preventDefault();
-  const btn = e.currentTarget as HTMLElement;
-  btn.classList.add('pressed');
-  pressKey(keyDef.key);
-}
-
-function onTouchEnd(e: Event): void {
-  (e.currentTarget as HTMLElement).classList.remove('pressed');
+function onRelease(): void {
+  pressedKey.value = null;
 }
 </script>
 
@@ -71,13 +62,13 @@ function onTouchEnd(e: Event): void {
       <button
         v-for="keyDef in row"
         :key="keyDef.key"
-        :class="['dsky-key', keyDef.className || 'key-digit']"
+        :class="['dsky-key', keyDef.className || 'key-digit', { pressed: pressedKey === keyDef.key }]"
         :data-key="keyDef.key"
-        @mousedown="onMouseDown($event, keyDef)"
-        @mouseup="onMouseUp"
-        @mouseleave="onMouseUp"
-        @touchstart="onTouchStart($event, keyDef)"
-        @touchend="onTouchEnd"
+        @mousedown="onPress($event, keyDef)"
+        @mouseup="onRelease"
+        @mouseleave="onRelease"
+        @touchstart="onPress($event, keyDef)"
+        @touchend="onRelease"
       >{{ keyDef.label }}</button>
     </div>
   </div>

@@ -17,7 +17,7 @@ export interface AGCCodeBlock {
   lines: AGCSourceLine[];
 }
 
-function parseLine(raw: string, file: string): AGCSourceLine {
+export function parseLine(raw: string, file: string = ''): AGCSourceLine {
   const trimmed = raw.trimStart();
   const isComment = trimmed.startsWith('#');
   const isLabel = !isComment && /^[A-Z0-9_]+\s/.test(trimmed) && !trimmed.startsWith(' ');

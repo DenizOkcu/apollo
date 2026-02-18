@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
-import { useCodeAnimation } from '../composables/useCodeAnimation';
+import { codeState } from '../composables/useCodeAnimation';
 import type { CodeEntry } from '../composables/useCodeAnimation';
 
-const { codeState } = useCodeAnimation();
 const contentEl = ref<HTMLElement | null>(null);
 
 const emit = defineEmits<{
@@ -24,7 +23,7 @@ function scrollToBottom(): void {
   }
 }
 
-watch(() => codeState.version, async () => {
+watch(() => codeState.entries.length, async () => {
   await nextTick();
   scrollToBottom();
 });

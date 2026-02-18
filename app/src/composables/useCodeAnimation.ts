@@ -26,11 +26,10 @@ let currentLineIndex = 0;
 
 const LINE_INTERVAL = 120;
 
-const codeState = reactive({
+export const codeState = reactive({
   entries: [] as CodeEntry[],
   headerTitle: 'AGC SOURCE',
   currentFile: null as string | null,
-  version: 0,
 });
 
 function stopCodeAnimation(): void {
@@ -70,7 +69,6 @@ export function showCodeBlock(block: AGCCodeBlock): void {
 
     const line = lineQueue[currentLineIndex];
     codeState.entries.push({ id: nextId++, line });
-    codeState.version++;
     currentLineIndex++;
   }, LINE_INTERVAL);
 }
@@ -80,7 +78,6 @@ export function clearCodeViewer(): void {
   codeState.entries.length = 0;
   codeState.headerTitle = 'AGC SOURCE';
   codeState.currentFile = null;
-  codeState.version++;
 }
 
 export function flushCodeBlock(): void {
@@ -94,20 +91,8 @@ export function flushCodeBlock(): void {
   }
   lineQueue = [];
   currentLineIndex = 0;
-  codeState.version++;
 }
 
 export function addCodeSeparator(): void {
   codeState.entries.push({ id: nextId++, type: 'separator' });
-  codeState.version++;
-}
-
-export function useCodeAnimation() {
-  return {
-    codeState,
-    showCodeBlock,
-    clearCodeViewer,
-    flushCodeBlock,
-    addCodeSeparator,
-  };
 }

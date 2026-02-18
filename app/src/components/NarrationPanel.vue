@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
-import { useNarration } from '../composables/useNarration';
+import { ref, watch, nextTick, onUnmounted } from 'vue';
+import { narrationState } from '../composables/useNarration';
 import type { NarrationEntry } from '../composables/useNarration';
 
-const { entries, version } = useNarration();
 const contentEl = ref<HTMLElement | null>(null);
 
 // Track which entries have been fully typed out
@@ -35,25 +34,30 @@ function scrollToBottom(): void {
 // Watch for new entries
 let lastLength = 0;
 watch(
-  () => version.version,
+  () => narrationState.entries.length,
   async () => {
-    if (entries.length > lastLength) {
+    if (narrationState.entries.length > lastLength) {
       // New entries added
-      for (let i = lastLength; i < entries.length; i++) {
-        startTyping(entries[i]);
+      for (let i = lastLength; i < narrationState.entries.length; i++) {
+        startTyping(narrationState.entries[i]);
       }
-    } else if (entries.length === 0) {
+    } else if (narrationState.entries.length === 0) {
       // Cleared
       for (const timer of intervals) clearInterval(timer);
       intervals.clear();
       typedTexts.value.clear();
     }
-    lastLength = entries.length;
+    lastLength = narrationState.entries.length;
     await nextTick();
     scrollToBottom();
   },
   { immediate: true }
 );
+
+onUnmounted(() => {
+  for (const timer of intervals) clearInterval(timer);
+  intervals.clear();
+});
 
 function getTypedText(entry: NarrationEntry): string {
   return typedTexts.value.get(entry.id) ?? entry.text;
@@ -65,7 +69,7 @@ function getTypedText(entry: NarrationEntry): string {
     <div class="narration-header">MISSION LOG</div>
     <div ref="contentEl" class="narration-content">
       <div
-        v-for="entry in entries"
+        v-for="entry in narrationState.entries"
         :key="entry.id"
         :class="['narration-entry', { 'key-hint': entry.isHint }]"
       >
